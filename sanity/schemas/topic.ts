@@ -19,21 +19,10 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "track",
-      title: "Track",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: "subject",
-      title: "Subject",
-      type: "string",
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
       name: "module",
       title: "Module",
-      type: "string",
+      type: "reference",
+      to: [{ type: "module" }],
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -95,17 +84,30 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "order",
+      title: "Order",
+      type: "number",
+      validation: (Rule) => Rule.required().min(1),
+    }),
+    defineField({
       name: "whyItMatters",
       title: "Why It Matters",
       type: "array",
       of: [{ type: "block" }],
     }),
   ],
+  orderings: [
+    {
+      title: "Order",
+      name: "orderAsc",
+      by: [{ field: "order", direction: "asc" }],
+    },
+  ],
   preview: {
-    select: { title: "title", subtitle: "track" },
-    prepare: ({ title, subtitle }) => ({
+    select: { title: "title", module: "module.title" },
+    prepare: ({ title, module }) => ({
       title,
-      subtitle: subtitle ? `Track: ${subtitle}` : "",
+      subtitle: module ? `Module: ${module}` : "",
     }),
   },
 });
