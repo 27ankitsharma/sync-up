@@ -11,9 +11,9 @@ interface SyllabusState {
 
 interface HierarchyData {
   tracks: string[];
-  subjects: Record<string, string[]>; // track → subjects
-  modules: Record<string, Record<string, string[]>>; // track → subject → modules
-  topicsByModule: Record<string, Topic[]>; // "track|subject|module" → topics
+  subjects: Record<string, string[]>;
+  modules: Record<string, Record<string, string[]>>;
+  topicsByModule: Record<string, Topic[]>;
 }
 
 interface SyllabusContextValue {
@@ -37,11 +37,45 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectedTopicSlug: null,
   });
 
+  // 🔥 UPDATED QUERY (fully dereferenced)
   const { data: allTopics, isLoading } = useQuery<Topic[]>({
     queryKey: ["all-topics-hierarchy"],
     queryFn: () =>
       sanityClient.fetch(
-        `*[_type == "topic"] | order(track asc, subject asc, module asc, title asc)`
+        `*[_type == "topic"]{
+          _id,
+          title,
+          slug,
+          roles,
+          difficulty,
+          layer,
+          status,
+          lastUpdated,
+          order,
+          summary,
+          module->{
+            _id,
+            title,
+            order,
+            subject->{
+              _id,
+              title,
+              order,
+              track->{
+                _id,
+                title,
+                order,
+                icon
+              }
+            }
+          }
+        }
+        | order(
+          module.subject.track.order asc,
+          module.subject.order asc,
+          module.order asc,
+          order asc
+        )`,
       ),
   });
 
@@ -49,6 +83,7 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     if (!allTopics) return null;
 
     const tracks = [...new Set(allTopics.map((t) => t.module?.subject?.track?.title ?? "").filter(Boolean))];
+
     const subjects: Record<string, string[]> = {};
     const modules: Record<string, Record<string, string[]>> = {};
     const topicsByModule: Record<string, Topic[]> = {};
@@ -58,6 +93,8 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
       const subjectName = topic.module?.subject?.title ?? "";
       const moduleName = topic.module?.title ?? "";
 
+      if (!trackName || !subjectName || !moduleName) continue;
+
       // Subjects per track
       if (!subjects[trackName]) subjects[trackName] = [];
       if (!subjects[trackName].includes(subjectName)) {
@@ -66,12 +103,14 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
 
       // Modules per track+subject
       if (!modules[trackName]) modules[trackName] = {};
-      if (!modules[trackName][subjectName]) modules[trackName][subjectName] = [];
+      if (!modules[trackName][subjectName]) {
+        modules[trackName][subjectName] = [];
+      }
       if (!modules[trackName][subjectName].includes(moduleName)) {
         modules[trackName][subjectName].push(moduleName);
       }
 
-      // Topics per module key
+      // Topics per module
       const key = `${trackName}|${subjectName}|${moduleName}`;
       if (!topicsByModule[key]) topicsByModule[key] = [];
       topicsByModule[key].push(topic);
@@ -81,15 +120,27 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
   }, [allTopics]);
 
   const setTrack = useCallback((track: string | null) => {
-    setState((prev) => ({ ...prev, track, subject: null, selectedTopicSlug: null }));
+    setState((prev) => ({
+      ...prev,
+      track,
+      subject: null,
+      selectedTopicSlug: null,
+    }));
   }, []);
 
   const setSubject = useCallback((subject: string | null) => {
-    setState((prev) => ({ ...prev, subject, selectedTopicSlug: null }));
+    setState((prev) => ({
+      ...prev,
+      subject,
+      selectedTopicSlug: null,
+    }));
   }, []);
 
   const selectTopic = useCallback((slug: string | null) => {
-    setState((prev) => ({ ...prev, selectedTopicSlug: slug }));
+    setState((prev) => ({
+      ...prev,
+      selectedTopicSlug: slug,
+    }));
   }, []);
 
   const subjectsForTrack = useMemo(() => {
@@ -99,10 +150,15 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
 
   const modulesForSubject = useMemo(() => {
     if (!hierarchy || !state.track || !state.subject) return [];
+
     const mods = hierarchy.modules[state.track]?.[state.subject] || [];
+
     return mods.map((mod) => {
       const key = `${state.track}|${state.subject}|${mod}`;
-      return { module: mod, topics: hierarchy.topicsByModule[key] || [] };
+      return {
+        module: mod,
+        topics: hierarchy.topicsByModule[key] || [],
+      };
     });
   }, [hierarchy, state.track, state.subject]);
 
@@ -123,13 +179,13 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectTopic,
   };
 
-  return (
-    <SyllabusContext.Provider value={value}>{children}</SyllabusContext.Provider>
-  );
+  return <SyllabusContext.Provider value={value}>{children}</SyllabusContext.Provider>;
 }
 
 export function useSyllabus() {
   const ctx = useContext(SyllabusContext);
-  if (!ctx) throw new Error("useSyllabus must be used within SyllabusProvider");
+  if (!ctx) {
+    throw new Error("useSyllabus must be used within SyllabusProvider");
+  }
   return ctx;
 }
