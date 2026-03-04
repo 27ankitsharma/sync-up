@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import type { Topic } from "@/lib/types";
 
-const difficultyColors: Record<string, string> = {
-  beginner: "bg-emerald-500/10 text-emerald-700 border-emerald-200",
-  intermediate: "bg-amber-500/10 text-amber-700 border-amber-200",
-  advanced: "bg-rose-500/10 text-rose-700 border-rose-200",
+const difficultyClasses: Record<string, string> = {
+  beginner: "badge-difficulty-beginner",
+  intermediate: "badge-difficulty-intermediate",
+  advanced: "badge-difficulty-advanced",
 };
 
 export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }) {
@@ -31,7 +31,7 @@ export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }
           </CardHeader>
           <CardContent className="pt-0">
             <div className="flex flex-wrap gap-1.5">
-              <Badge variant="outline" className={difficultyColors[topic.difficulty] || ""}>
+              <Badge variant="outline" className={difficultyClasses[topic.difficulty] || ""}>
                 {topic.difficulty}
               </Badge>
               <Badge variant="secondary" className="text-xs">
