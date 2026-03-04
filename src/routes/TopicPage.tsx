@@ -59,15 +59,15 @@ export default function TopicPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <span className="text-muted-foreground">{topic.track}</span>
+            <span className="text-muted-foreground">{topic.module?.subject?.track?.title ?? ""}</span>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <span className="text-muted-foreground">{topic.subject}</span>
+            <span className="text-muted-foreground">{topic.module?.subject?.title ?? ""}</span>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <span className="text-muted-foreground">{topic.module}</span>
+            <span className="text-muted-foreground">{topic.module?.title ?? ""}</span>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

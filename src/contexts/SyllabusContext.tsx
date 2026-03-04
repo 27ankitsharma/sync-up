@@ -48,27 +48,31 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
   const hierarchy = useMemo<HierarchyData | null>(() => {
     if (!allTopics) return null;
 
-    const tracks = [...new Set(allTopics.map((t) => t.track))];
+    const tracks = [...new Set(allTopics.map((t) => t.module?.subject?.track?.title ?? "").filter(Boolean))];
     const subjects: Record<string, string[]> = {};
     const modules: Record<string, Record<string, string[]>> = {};
     const topicsByModule: Record<string, Topic[]> = {};
 
     for (const topic of allTopics) {
+      const trackName = topic.module?.subject?.track?.title ?? "";
+      const subjectName = topic.module?.subject?.title ?? "";
+      const moduleName = topic.module?.title ?? "";
+
       // Subjects per track
-      if (!subjects[topic.track]) subjects[topic.track] = [];
-      if (!subjects[topic.track].includes(topic.subject)) {
-        subjects[topic.track].push(topic.subject);
+      if (!subjects[trackName]) subjects[trackName] = [];
+      if (!subjects[trackName].includes(subjectName)) {
+        subjects[trackName].push(subjectName);
       }
 
       // Modules per track+subject
-      if (!modules[topic.track]) modules[topic.track] = {};
-      if (!modules[topic.track][topic.subject]) modules[topic.track][topic.subject] = [];
-      if (!modules[topic.track][topic.subject].includes(topic.module)) {
-        modules[topic.track][topic.subject].push(topic.module);
+      if (!modules[trackName]) modules[trackName] = {};
+      if (!modules[trackName][subjectName]) modules[trackName][subjectName] = [];
+      if (!modules[trackName][subjectName].includes(moduleName)) {
+        modules[trackName][subjectName].push(moduleName);
       }
 
       // Topics per module key
-      const key = `${topic.track}|${topic.subject}|${topic.module}`;
+      const key = `${trackName}|${subjectName}|${moduleName}`;
       if (!topicsByModule[key]) topicsByModule[key] = [];
       topicsByModule[key].push(topic);
     }
