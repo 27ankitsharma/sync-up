@@ -104,11 +104,11 @@ function TopicDetail({ slug }: { slug: string }) {
     >
       {/* Breadcrumb path */}
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <span>{topic.track}</span>
+        <span>{topic.module?.subject?.track?.title ?? ""}</span>
         <span>→</span>
-        <span>{topic.subject}</span>
+        <span>{topic.module?.subject?.title ?? ""}</span>
         <span>→</span>
-        <span>{topic.module}</span>
+        <span>{topic.module?.title ?? ""}</span>
         <span>→</span>
         <span className="text-foreground font-medium">{topic.title}</span>
       </div>

@@ -26,7 +26,7 @@ export function TopicCard({ topic, index = 0 }: { topic: Topic; index?: number }
               </CardTitle>
             </div>
             <p className="text-xs text-muted-foreground">
-              {topic.track} → {topic.subject} → {topic.module}
+              {topic.module?.subject?.track?.title ?? topic.track ?? ""} → {topic.module?.subject?.title ?? topic.subject ?? ""} → {topic.module?.title ?? ""}
             </p>
           </CardHeader>
           <CardContent className="pt-0">
