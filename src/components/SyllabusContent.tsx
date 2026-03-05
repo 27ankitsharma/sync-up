@@ -168,11 +168,27 @@ function TopicDetail({ slug }: { slug: string }) {
                     {i + 1}. {lesson.title}
                   </h3>
                   <div className="text-sm text-muted-foreground leading-relaxed space-y-2">
-                    {lesson.content?.map((block: any, j: number) => (
-                      <p key={j}>
-                        {block.children?.map((child: any) => child.text).join("") || ""}
-                      </p>
-                    ))}
+                    {lesson.content?.map((block: any, j: number) => {
+                      if (block._type === "block") {
+                        return (
+                          <p key={j}>
+                            {block.children?.map((child: any) => child.text).join("")}
+                          </p>
+                        );
+                      }
+
+                      if (block._type === "code") {
+                        return (
+                          <pre
+                            key={j}
+                            className="bg-muted p-4 rounded-md text-xs overflow-x-auto border"
+                          >
+                            <code>{block.code}</code>
+                          </pre>
+                        );
+                      }
+                      return null;
+                    })}
                   </div>
                 </CardContent>
               </Card>
