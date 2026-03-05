@@ -11,7 +11,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function TopicDetail({ slug }: { slug: string }) {
   const { data: topic, isLoading, isError } = useTopic(slug);
-  const [activeLessonIndex, setActiveLessonIndex] = useState(0);
+  const [activeLessonIndex, setActiveLessonIndex] = useState<number | null>(null);
 
   if (isLoading) return <TopicPageSkeleton />;
 
@@ -36,9 +36,9 @@ export function TopicDetail({ slug }: { slug: string }) {
   }
 
   const lessons = topic.lessons || [];
-  const activeLesson = lessons[activeLessonIndex];
-  const hasPrev = activeLessonIndex > 0;
-  const hasNext = activeLessonIndex < lessons.length - 1;
+  const activeLesson = activeLessonIndex !== null ? lessons[activeLessonIndex] : null;
+  const hasPrev = activeLessonIndex !== null && activeLessonIndex > 0;
+  const hasNext = activeLessonIndex !== null && activeLessonIndex < lessons.length - 1;
 
   return (
     <motion.div
@@ -91,49 +91,75 @@ export function TopicDetail({ slug }: { slug: string }) {
         </Card>
       )}
 
-      {/* Lessons with side nav */}
+      {/* Lessons */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground mb-4">Lessons</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-foreground">Lessons</h2>
+          {activeLesson && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setActiveLessonIndex(null)}
+              className="text-xs text-muted-foreground"
+            >
+              ← Back to all lessons
+            </Button>
+          )}
+        </div>
+
         {lessons.length === 0 ? (
           <EmptyState
             icon="📝"
             title="Lessons coming soon"
             description="This topic's lessons are being prepared. Check back later!"
           />
+        ) : activeLesson === null ? (
+          /* Lesson list */
+          <div className="space-y-2">
+            {lessons.map((lesson, i) => (
+              <motion.button
+                key={lesson._id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                onClick={() => setActiveLessonIndex(i)}
+                className="w-full text-left group"
+              >
+                <Card className="transition-colors hover:border-primary/40 hover:bg-primary/5">
+                  <CardContent className="py-3.5 px-4 flex items-center gap-3">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      {lesson.title}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </CardContent>
+                </Card>
+              </motion.button>
+            ))}
+          </div>
         ) : (
+          /* Active lesson content */
           <div className="flex gap-6">
-            {/* Vertical lesson nav - desktop */}
             <LessonNav
               lessons={lessons}
-              activeIndex={activeLessonIndex}
+              activeIndex={activeLessonIndex!}
               onSelect={setActiveLessonIndex}
             />
 
-            {/* Active lesson content */}
             <div className="flex-1 min-w-0">
               {/* Mobile lesson selector */}
               <div className="lg:hidden mb-4">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span className="font-medium text-foreground">
-                    Lesson {activeLessonIndex + 1} of {lessons.length}
+                    Lesson {activeLessonIndex! + 1} of {lessons.length}
                   </span>
                   <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      disabled={!hasPrev}
-                      onClick={() => setActiveLessonIndex((i) => i - 1)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-7 w-7" disabled={!hasPrev} onClick={() => setActiveLessonIndex((i) => i! - 1)}>
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      disabled={!hasNext}
-                      onClick={() => setActiveLessonIndex((i) => i + 1)}
-                    >
+                    <Button variant="ghost" size="icon" className="h-7 w-7" disabled={!hasNext} onClick={() => setActiveLessonIndex((i) => i! + 1)}>
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -151,23 +177,16 @@ export function TopicDetail({ slug }: { slug: string }) {
                   <Card>
                     <CardContent className="py-5">
                       <h3 className="font-semibold text-foreground mb-3 text-lg">
-                        {activeLessonIndex + 1}. {activeLesson.title}
+                        {activeLessonIndex! + 1}. {activeLesson.title}
                       </h3>
                       <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
                         {activeLesson.content?.map((block: any, j: number) => {
                           if (block._type === "block") {
-                            return (
-                              <p key={j}>
-                                {block.children?.map((child: any) => child.text).join("")}
-                              </p>
-                            );
+                            return <p key={j}>{block.children?.map((child: any) => child.text).join("")}</p>;
                           }
                           if (block._type === "code") {
                             return (
-                              <pre
-                                key={j}
-                                className="bg-muted p-4 rounded-md text-xs overflow-x-auto border font-mono"
-                              >
+                              <pre key={j} className="bg-muted p-4 rounded-md text-xs overflow-x-auto border font-mono">
                                 <code>{block.code}</code>
                               </pre>
                             );
@@ -182,26 +201,14 @@ export function TopicDetail({ slug }: { slug: string }) {
 
               {/* Prev / Next buttons */}
               <div className="flex items-center justify-between mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!hasPrev}
-                  onClick={() => setActiveLessonIndex((i) => i - 1)}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Previous
+                <Button variant="outline" size="sm" disabled={!hasPrev} onClick={() => setActiveLessonIndex((i) => i! - 1)}>
+                  <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                 </Button>
                 <span className="text-xs text-muted-foreground hidden sm:block">
-                  {activeLessonIndex + 1} / {lessons.length}
+                  {activeLessonIndex! + 1} / {lessons.length}
                 </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!hasNext}
-                  onClick={() => setActiveLessonIndex((i) => i + 1)}
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4 ml-1" />
+                <Button variant="outline" size="sm" disabled={!hasNext} onClick={() => setActiveLessonIndex((i) => i! + 1)}>
+                  Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             </div>
