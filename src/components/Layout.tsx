@@ -82,10 +82,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isFullWidth = pathname === "/syllabus-map";
+
   return (
     <div className="min-h-screen bg-background font-sans">
       {header}
-      <main className="container py-8">{children}</main>
+      <main className={isFullWidth ? "" : "container py-8"}>{children}</main>
     </div>
   );
 }
