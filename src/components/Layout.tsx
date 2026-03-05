@@ -8,6 +8,7 @@ import { SyllabusProvider } from "@/contexts/SyllabusContext";
 const navItems = [
   { path: "/", label: "Home" },
   { path: "/syllabus", label: "Syllabus" },
+  { path: "/syllabus-map", label: "Full Syllabus" },
   { path: "/radar", label: "AI Radar" },
 ];
 
