@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { sanityClient } from "@/lib/sanity";
-import { TreeNode, type TreeNodeData } from "@/components/TreeNode";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
+import { MindMapGraph, type MindMapNode } from "@/components/MindMapGraph";
 import type { Topic } from "@/lib/types";
 
 export default function SyllabusMap() {
@@ -29,10 +29,18 @@ export default function SyllabusMap() {
       ),
   });
 
-  const tree = useMemo<TreeNodeData[]>(() => {
-    if (!topics) return [];
+  const tree = useMemo<MindMapNode | null>(() => {
+    if (!topics || topics.length === 0) return null;
 
-    const trackMap = new Map<string, TreeNodeData>();
+    const root: MindMapNode = {
+      id: "root",
+      label: "Syllabus",
+      type: "root",
+      icon: "⚡",
+      children: [],
+    };
+
+    const trackMap = new Map<string, MindMapNode>();
 
     for (const t of topics) {
       const track = t.module?.subject?.track;
@@ -42,13 +50,15 @@ export default function SyllabusMap() {
 
       // Track
       if (!trackMap.has(track._id)) {
-        trackMap.set(track._id, {
+        const trackNode: MindMapNode = {
           id: track._id,
           label: track.title,
           type: "track",
           icon: track.icon,
           children: [],
-        });
+        };
+        trackMap.set(track._id, trackNode);
+        root.children!.push(trackNode);
       }
       const trackNode = trackMap.get(track._id)!;
 
@@ -72,38 +82,43 @@ export default function SyllabusMap() {
           id: t._id,
           label: t.title,
           type: "topic",
-          slug: t.slug.current,
+          slug: t.slug?.current,
         });
       }
     }
 
-    return Array.from(trackMap.values());
+    return root;
   }, [topics]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="space-y-3 w-64">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-6 w-1/2" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!tree) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <p className="text-muted-foreground text-sm">No content found.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Full Syllabus</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Explore the entire curriculum as an interactive knowledge tree.
+    <div className="h-[calc(100vh-4rem)] w-full relative">
+      <div className="absolute top-4 left-4 z-10 bg-card/80 backdrop-blur-sm border border-border rounded-lg px-4 py-3 shadow-sm">
+        <h1 className="text-lg font-bold text-foreground">Full Syllabus</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Click nodes to expand · Scroll to zoom · Drag to pan
         </p>
       </div>
-
-      {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-full" />
-          ))}
-        </div>
-      ) : tree.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No content found.</p>
-      ) : (
-        <div className="border border-border rounded-lg bg-card p-4 space-y-1">
-          {tree.map((node) => (
-            <TreeNode key={node.id} node={node} />
-          ))}
-        </div>
-      )}
+      <MindMapGraph data={tree} />
     </div>
   );
 }
