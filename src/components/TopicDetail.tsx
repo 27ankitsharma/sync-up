@@ -4,6 +4,7 @@ import { TopicPageSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { TopicMeta } from "@/components/TopicMeta";
 import { Button } from "@/components/ui/button";
 import { LessonNav } from "@/components/LessonNav";
 import { motion, AnimatePresence } from "framer-motion";
@@ -62,14 +63,8 @@ export function TopicDetail({ slug }: { slug: string }) {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">{topic.title}</h1>
-        <div className="flex flex-wrap gap-2 mt-3">
-          <Badge variant="outline">{topic.difficulty}</Badge>
-          <Badge variant="secondary">{topic.layer}</Badge>
-          {topic.roles?.map((r) => (
-            <Badge key={r} variant="outline" className="text-xs">
-              {r}
-            </Badge>
-          ))}
+        <div className="mt-4">
+          <TopicMeta topic={topic} />
         </div>
       </div>
 

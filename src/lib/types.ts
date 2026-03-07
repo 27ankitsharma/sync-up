@@ -28,6 +28,7 @@ export interface Topic {
   lastUpdated: string;
   summary?: string;
   order?: number;
+  priority?: "high" | "medium" | "low";
   whyItMatters?: any[]; // Portable Text blocks
   lessons?: Lesson[];
 }
@@ -36,6 +37,7 @@ export interface Lesson {
   _id: string;
   title: string;
   order: number;
+  duration?: number; // minutes
   content: any[]; // Portable Text blocks
 }
 
