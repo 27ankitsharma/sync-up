@@ -96,8 +96,10 @@ export function useTopic(slug: string) {
               }
             }
           },
-          "lessons": *[_type == "lesson" && references(^._id)]
-            | order(order asc)
+          priority,
+          "lessons": *[_type == "lesson" && references(^._id)]{
+            _id, title, order, duration, content
+          } | order(order asc)
         }`,
         { slug },
       ),
