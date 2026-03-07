@@ -63,14 +63,8 @@ export function TopicDetail({ slug }: { slug: string }) {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">{topic.title}</h1>
-        <div className="flex flex-wrap gap-2 mt-3">
-          <Badge variant="outline">{topic.difficulty}</Badge>
-          <Badge variant="secondary">{topic.layer}</Badge>
-          {topic.roles?.map((r) => (
-            <Badge key={r} variant="outline" className="text-xs">
-              {r}
-            </Badge>
-          ))}
+        <div className="mt-4">
+          <TopicMeta topic={topic} />
         </div>
       </div>
 
