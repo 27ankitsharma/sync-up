@@ -4,6 +4,7 @@ import { TopicPageSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { TopicMeta } from "@/components/TopicMeta";
 import { Button } from "@/components/ui/button";
 import { LessonNav } from "@/components/LessonNav";
 import { motion, AnimatePresence } from "framer-motion";
