@@ -25,6 +25,12 @@ export default defineType({
       validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
+      name: "duration",
+      title: "Duration (minutes)",
+      type: "number",
+      validation: (Rule) => Rule.min(0),
+    }),
+    defineField({
       name: "content",
       title: "Content",
       type: "array",
