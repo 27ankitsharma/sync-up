@@ -90,6 +90,19 @@ export default defineType({
       validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
+      name: "priority",
+      title: "Priority",
+      type: "string",
+      options: {
+        list: [
+          { title: "High", value: "high" },
+          { title: "Medium", value: "medium" },
+          { title: "Low", value: "low" },
+        ],
+        layout: "radio",
+      },
+    }),
+    defineField({
       name: "whyItMatters",
       title: "Why It Matters",
       type: "array",
