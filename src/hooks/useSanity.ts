@@ -4,7 +4,7 @@ import type { Topic, Filters } from "@/lib/types";
 
 /**
  * Fetch topics for Syllabus page (with filters)
- * Normalized schema: Track → Subject → Module → Topic
+ * Fully ordered hierarchy
  */
 export function useTopics(filters: Filters) {
   return useQuery<Topic[]>({
@@ -27,6 +27,7 @@ export function useTopics(filters: Filters) {
           lastUpdated,
           order,
           summary,
+          priority,
           module->{
             _id,
             title,
@@ -54,14 +55,14 @@ export function useTopics(filters: Filters) {
           role: filters.role || null,
           difficulty: filters.difficulty || null,
           layer: filters.layer || null,
-        },
+        }
       ),
   });
 }
 
 /**
  * Fetch single topic by slug
- * Includes full hierarchy + ordered lessons
+ * Includes ordered lessons + hierarchy
  */
 export function useTopic(slug: string) {
   return useQuery<Topic | null>({
@@ -80,6 +81,7 @@ export function useTopic(slug: string) {
           summary,
           whyItMatters,
           order,
+          priority,
           module->{
             _id,
             title,
@@ -96,12 +98,15 @@ export function useTopic(slug: string) {
               }
             }
           },
-          priority,
           "lessons": *[_type == "lesson" && references(^._id)]{
-            _id, title, order, duration, content
+            _id,
+            title,
+            order,
+            duration,
+            content
           } | order(order asc)
         }`,
-        { slug },
+        { slug }
       ),
     enabled: !!slug,
   });
@@ -109,7 +114,7 @@ export function useTopic(slug: string) {
 
 /**
  * Fetch topics for AI Radar page
- * Sorted by lastUpdated (time-first)
+ * Sorted by recency first
  */
 export function useRadarTopics() {
   return useQuery<Topic[]>({
@@ -123,12 +128,17 @@ export function useRadarTopics() {
           layer,
           status,
           lastUpdated,
+          priority,
+          order,
           module->{
             title,
+            order,
             subject->{
               title,
+              order,
               track->{
-                title
+                title,
+                order
               }
             }
           }
@@ -146,9 +156,15 @@ export function useFilterOptions() {
     queryKey: ["filter-options"],
     queryFn: async () => {
       const [roles, layers, difficulties] = await Promise.all([
-        sanityClient.fetch<string[]>(`array::unique(*[_type == "topic"].roles[])`),
-        sanityClient.fetch<string[]>(`array::unique(*[_type == "topic"].layer)`),
-        sanityClient.fetch<string[]>(`array::unique(*[_type == "topic"].difficulty)`),
+        sanityClient.fetch<string[]>(
+          `array::unique(*[_type == "topic"].roles[])`
+        ),
+        sanityClient.fetch<string[]>(
+          `array::unique(*[_type == "topic"].layer)`
+        ),
+        sanityClient.fetch<string[]>(
+          `array::unique(*[_type == "topic"].difficulty)`
+        ),
       ]);
 
       return {
