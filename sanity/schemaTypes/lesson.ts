@@ -1,4 +1,6 @@
 import { defineType, defineField } from "sanity";
+import { orderRankField } from '@sanity/orderable-document-list'
+
 
 export default defineType({
   name: "lesson",
@@ -53,6 +55,9 @@ export default defineType({
         },
       ],
     }),
+
+    // ✅ NEW FIELD (required for drag-drop)
+    orderRankField({ type: "lesson" }),
   ],
   orderings: [
     {

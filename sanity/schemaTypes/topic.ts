@@ -1,4 +1,6 @@
 import { defineType, defineField } from "sanity";
+import { orderRankField } from '@sanity/orderable-document-list'
+
 
 export default defineType({
   name: "topic",
@@ -108,6 +110,9 @@ export default defineType({
       type: "array",
       of: [{ type: "block" }],
     }),
+    
+    // ✅ NEW FIELD (required for drag-drop)
+    orderRankField({ type: "topic" }),
   ],
   orderings: [
     {

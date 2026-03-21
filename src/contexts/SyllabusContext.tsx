@@ -37,7 +37,7 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectedTopicSlug: null,
   });
 
-  // 🔥 UPDATED QUERY (fully dereferenced)
+  // ✅ FIXED: use orderRank instead of order
   const { data: allTopics, isLoading } = useQuery<Topic[]>({
     queryKey: ["all-topics-hierarchy"],
     queryFn: () =>
@@ -51,38 +51,45 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
           layer,
           status,
           lastUpdated,
-          order,
+          orderRank,
           summary,
           module->{
             _id,
             title,
-            order,
+            orderRank,
             subject->{
               _id,
               title,
-              order,
+              orderRank,
               track->{
                 _id,
                 title,
-                order,
+                orderRank,
                 icon
               }
             }
           }
         }
         | order(
-          module.subject.track.order asc,
-          module.subject.order asc,
-          module.order asc,
-          order asc
+          module.subject.track.orderRank asc,
+          module.subject.orderRank asc,
+          module.orderRank asc,
+          orderRank asc
         )`,
-      ),
+    ),
+    staleTime: 0,
   });
 
   const hierarchy = useMemo<HierarchyData | null>(() => {
     if (!allTopics) return null;
 
-    const tracks = [...new Set(allTopics.map((t) => t.module?.subject?.track?.title ?? "").filter(Boolean))];
+    const tracks = [
+      ...new Set(
+        allTopics
+          .map((t) => t.module?.subject?.track?.title ?? "")
+          .filter(Boolean)
+      ),
+    ];
 
     const subjects: Record<string, string[]> = {};
     const modules: Record<string, Record<string, string[]>> = {};
@@ -95,13 +102,13 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
 
       if (!trackName || !subjectName || !moduleName) continue;
 
-      // Subjects per track
+      // Subjects
       if (!subjects[trackName]) subjects[trackName] = [];
       if (!subjects[trackName].includes(subjectName)) {
         subjects[trackName].push(subjectName);
       }
 
-      // Modules per track+subject
+      // Modules
       if (!modules[trackName]) modules[trackName] = {};
       if (!modules[trackName][subjectName]) {
         modules[trackName][subjectName] = [];
@@ -110,11 +117,19 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
         modules[trackName][subjectName].push(moduleName);
       }
 
-      // Topics per module
+      // Topics
       const key = `${trackName}|${subjectName}|${moduleName}`;
       if (!topicsByModule[key]) topicsByModule[key] = [];
+
       topicsByModule[key].push(topic);
     }
+
+    // ✅ CRITICAL FIX: preserve ordering AFTER grouping
+    Object.keys(topicsByModule).forEach((key) => {
+      topicsByModule[key].sort((a, b) =>
+        (a.orderRank || "").localeCompare(b.orderRank || "")
+      );
+    });
 
     return { tracks, subjects, modules, topicsByModule };
   }, [allTopics]);
@@ -164,7 +179,9 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
 
   const selectedTopic = useMemo(() => {
     if (!allTopics || !state.selectedTopicSlug) return null;
-    return allTopics.find((t) => t.slug.current === state.selectedTopicSlug) || null;
+    return (
+      allTopics.find((t) => t.slug.current === state.selectedTopicSlug) || null
+    );
   }, [allTopics, state.selectedTopicSlug]);
 
   const value: SyllabusContextValue = {
@@ -179,7 +196,11 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectTopic,
   };
 
-  return <SyllabusContext.Provider value={value}>{children}</SyllabusContext.Provider>;
+  return (
+    <SyllabusContext.Provider value={value}>
+      {children}
+    </SyllabusContext.Provider>
+  );
 }
 
 export function useSyllabus() {

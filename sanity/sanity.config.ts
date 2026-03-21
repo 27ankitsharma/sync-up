@@ -3,6 +3,8 @@ import { structureTool } from 'sanity/structure'
 import { schemaTypes } from './schemaTypes'
 import { structure } from './structure'
 import { codeInput } from '@sanity/code-input'
+import { visionTool } from '@sanity/vision'
+import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list'
 
 export default defineConfig({
   name: 'default',
@@ -11,7 +13,7 @@ export default defineConfig({
   projectId: 'x92kshl7',
   dataset: 'production',
 
-  plugins: [structureTool({ structure }),codeInput(),],
+  plugins: [structureTool({ structure }),codeInput(),visionTool(),],
 
   schema: {
     types: schemaTypes,

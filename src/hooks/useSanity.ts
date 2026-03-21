@@ -4,7 +4,7 @@ import type { Topic, Filters } from "@/lib/types";
 
 /**
  * Fetch topics for Syllabus page (with filters)
- * Fully ordered hierarchy
+ * Uses orderRank for correct drag-drop ordering
  */
 export function useTopics(filters: Filters) {
   return useQuery<Topic[]>({
@@ -25,31 +25,31 @@ export function useTopics(filters: Filters) {
           layer,
           status,
           lastUpdated,
-          order,
           summary,
           priority,
+          orderRank,
           module->{
             _id,
             title,
-            order,
+            orderRank,
             subject->{
               _id,
               title,
-              order,
+              orderRank,
               track->{
                 _id,
                 title,
-                order,
+                orderRank,
                 icon
               }
             }
           }
         }
         | order(
-          module.subject.track.order asc,
-          module.subject.order asc,
-          module.order asc,
-          order asc
+          module.subject.track.orderRank asc,
+          module.subject.orderRank asc,
+          module.orderRank asc,
+          orderRank asc
         )`,
         {
           role: filters.role || null,
@@ -62,7 +62,7 @@ export function useTopics(filters: Filters) {
 
 /**
  * Fetch single topic by slug
- * Includes ordered lessons + hierarchy
+ * Includes ordered lessons using orderRank
  */
 export function useTopic(slug: string) {
   return useQuery<Topic | null>({
@@ -80,20 +80,20 @@ export function useTopic(slug: string) {
           lastUpdated,
           summary,
           whyItMatters,
-          order,
           priority,
+          orderRank,
           module->{
             _id,
             title,
-            order,
+            orderRank,
             subject->{
               _id,
               title,
-              order,
+              orderRank,
               track->{
                 _id,
                 title,
-                order,
+                orderRank,
                 icon
               }
             }
@@ -101,10 +101,10 @@ export function useTopic(slug: string) {
           "lessons": *[_type == "lesson" && references(^._id)]{
             _id,
             title,
-            order,
             duration,
-            content
-          } | order(order asc)
+            content,
+            orderRank
+          } | order(orderRank asc)
         }`,
         { slug }
       ),
@@ -114,7 +114,7 @@ export function useTopic(slug: string) {
 
 /**
  * Fetch topics for AI Radar page
- * Sorted by recency first
+ * Sorted by recency (NOT orderRank)
  */
 export function useRadarTopics() {
   return useQuery<Topic[]>({
@@ -129,16 +129,12 @@ export function useRadarTopics() {
           status,
           lastUpdated,
           priority,
-          order,
           module->{
             title,
-            order,
             subject->{
               title,
-              order,
               track->{
-                title,
-                order
+                title
               }
             }
           }

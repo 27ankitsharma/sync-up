@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { orderRankField } from "@sanity/orderable-document-list";
 
 export default defineType({
   name: "subject",
@@ -37,6 +38,9 @@ export default defineType({
       type: "number",
       validation: (Rule) => Rule.required().min(1),
     }),
+
+    // ✅ NEW FIELD (required for drag-drop)
+    orderRankField({ type: "subject" }),
   ],
   orderings: [
     {
