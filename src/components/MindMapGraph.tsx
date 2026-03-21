@@ -82,7 +82,7 @@ export function MindMapGraph({ data }: Props) {
     svg.call(zoom);
 
     // Center initially
-    const initialTransform = d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8);
+    const initialTransform = d3.zoomIdentity.translate(width * 0.2, height / 2).scale(0.8);
     svg.call(zoom.transform, initialTransform);
 
     const treeLayout = d3.tree<MindMapNode>()
