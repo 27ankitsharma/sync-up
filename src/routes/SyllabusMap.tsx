@@ -9,8 +9,8 @@ export default function SyllabusMap() {
   const { data: topics, isLoading } = useQuery<Topic[]>({
     queryKey: ["syllabus-map-topics"],
     queryFn: () =>
-      sanityClient.fetch(
-        `*[_type == "topic"]{
+    sanityClient.fetch(
+      `*[_type == "topic"]{
           _id, title, slug,
           module->{
             _id, title, order,
@@ -26,7 +26,7 @@ export default function SyllabusMap() {
           module.order asc,
           order asc
         )`
-      ),
+    )
   });
 
   const tree = useMemo<MindMapNode | null>(() => {
@@ -37,7 +37,7 @@ export default function SyllabusMap() {
       label: "Syllabus",
       type: "root",
       icon: "⚡",
-      children: [],
+      children: []
     };
 
     const trackMap = new Map<string, MindMapNode>();
@@ -55,7 +55,7 @@ export default function SyllabusMap() {
           label: track.title,
           type: "track",
           icon: track.icon,
-          children: [],
+          children: []
         };
         trackMap.set(track._id, trackNode);
         root.children!.push(trackNode);
@@ -82,7 +82,7 @@ export default function SyllabusMap() {
           id: t._id,
           label: t.title,
           type: "topic",
-          slug: t.slug?.current,
+          slug: t.slug?.current
         });
       }
     }
@@ -98,27 +98,27 @@ export default function SyllabusMap() {
           <Skeleton className="h-6 w-3/4" />
           <Skeleton className="h-6 w-1/2" />
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   if (!tree) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <p className="text-muted-foreground text-sm">No content found.</p>
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="h-[calc(100vh-4rem)] w-full relative">
       <div className="absolute top-4 left-4 z-10 bg-card/80 backdrop-blur-sm border border-border rounded-lg px-4 py-3 shadow-sm">
-        <h1 className="text-lg font-bold text-foreground">Full Syllabus</h1>
+        <h1 className="text-lg font-bold text-foreground">Interactive syllabus </h1>
         <p className="text-xs text-muted-foreground mt-0.5">
           Click nodes to expand · Scroll to zoom · Drag to pan
         </p>
       </div>
       <MindMapGraph data={tree} />
-    </div>
-  );
+    </div>);
+
 }
