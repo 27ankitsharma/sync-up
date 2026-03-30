@@ -118,7 +118,7 @@ export default defineType({
     {
       title: "Order",
       name: "orderAsc",
-      by: [{ field: "order", direction: "asc" }],
+      by: [{ field: "orderRank", direction: "asc" }],
     },
   ],
   preview: {

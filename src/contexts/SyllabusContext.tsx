@@ -37,7 +37,6 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectedTopicSlug: null,
   });
 
-  // ✅ FIXED: use orderRank instead of order
   const { data: allTopics, isLoading } = useQuery<Topic[]>({
     queryKey: ["all-topics-hierarchy"],
     queryFn: () =>
@@ -76,24 +75,19 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
           module.orderRank asc,
           orderRank asc
         )`,
-    ),
+      ),
     staleTime: 0,
   });
 
   const hierarchy = useMemo<HierarchyData | null>(() => {
     if (!allTopics) return null;
 
-    const tracks = [
-      ...new Set(
-        allTopics
-          .map((t) => t.module?.subject?.track?.title ?? "")
-          .filter(Boolean)
-      ),
-    ];
-
+    const tracks: string[] = [];
     const subjects: Record<string, string[]> = {};
     const modules: Record<string, Record<string, string[]>> = {};
     const topicsByModule: Record<string, Topic[]> = {};
+
+    const seenTracks = new Set<string>();
 
     for (const topic of allTopics) {
       const trackName = topic.module?.subject?.track?.title ?? "";
@@ -101,6 +95,12 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
       const moduleName = topic.module?.title ?? "";
 
       if (!trackName || !subjectName || !moduleName) continue;
+
+      // ✅ Preserve track order (NO Set bug)
+      if (!seenTracks.has(trackName)) {
+        tracks.push(trackName);
+        seenTracks.add(trackName);
+      }
 
       // Subjects
       if (!subjects[trackName]) subjects[trackName] = [];
@@ -124,7 +124,7 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
       topicsByModule[key].push(topic);
     }
 
-    // ✅ CRITICAL FIX: preserve ordering AFTER grouping
+    // ✅ Ensure topic order preserved
     Object.keys(topicsByModule).forEach((key) => {
       topicsByModule[key].sort((a, b) =>
         (a.orderRank || "").localeCompare(b.orderRank || "")

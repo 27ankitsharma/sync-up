@@ -18,19 +18,19 @@ interface HierarchyNode extends d3.HierarchyPointNode<MindMapNode> {
 }
 
 const nodeRadius: Record<string, number> = {
-  root: 32,
-  track: 24,
-  subject: 18,
-  module: 14,
-  topic: 10,
+  root: 34,
+  track: 26,
+  subject: 20,
+  module: 15,
+  topic: 11,
 };
 
 const nodeColors: Record<string, string> = {
-  root: "hsl(221, 83%, 53%)",
-  track: "hsl(221, 83%, 53%)",
-  subject: "hsl(221, 83%, 65%)",
-  module: "hsl(214, 95%, 73%)",
-  topic: "hsl(220, 14%, 76%)",
+  root: "#7c3aed",
+  track: "#4f46e5",
+  subject: "#2563eb",
+  module: "#16a34a",
+  topic: "#f59e0b",
 };
 
 const textSize: Record<string, number> = {
@@ -50,6 +50,8 @@ export function MindMapGraph({ data }: Props) {
   const navigate = useNavigate();
   const initializedRef = useRef(false);
 
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+
   const renderTree = useCallback(() => {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -59,20 +61,33 @@ export function MindMapGraph({ data }: Props) {
     const width = el.clientWidth;
     const height = el.clientHeight;
 
-    // Create hierarchy
+    if (!tooltipRef.current) {
+      tooltipRef.current = d3
+        .select("body")
+        .append("div")
+        .attr("class", "mindmap-tooltip")
+        .style("position", "absolute")
+        .style("padding", "8px 12px")
+        .style("background", "rgba(0,0,0,0.8)")
+        .style("color", "white")
+        .style("border-radius", "6px")
+        .style("font-size", "12px")
+        .style("pointer-events", "none")
+        .style("opacity", 0)
+        .node() as HTMLDivElement;
+    }
+
+    const tooltip = d3.select(tooltipRef.current);
+
     const root = d3.hierarchy<MindMapNode>(data) as HierarchyNode;
 
-    // Collapse all children initially except root
     root.children?.forEach(collapse);
 
     root.x0 = height / 2;
     root.y0 = width / 2;
 
-    const g = svg
-      .append("g")
-      .attr("class", "mind-map-container");
+    const g = svg.append("g").attr("class", "mind-map-container");
 
-    // Zoom behavior
     const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.2, 4])
       .on("zoom", (event) => {
@@ -85,36 +100,65 @@ export function MindMapGraph({ data }: Props) {
     const initialTransform = d3.zoomIdentity.translate(width * 0.2, height / 2).scale(0.8);
     svg.call(zoom.transform, initialTransform);
 
-    const treeLayout = d3.tree<MindMapNode>()
-      .nodeSize([60, 180])
+    const treeLayout = d3
+      .tree<MindMapNode>()
+      .nodeSize([65, 190])
       .separation((a, b) => (a.parent === b.parent ? 1.2 : 2));
 
     function collapse(d: HierarchyNode) {
       if (d.children) {
-        (d as any)._children = d.children;
-        d.children = undefined as any;
-        (d as any)._children.forEach(collapse);
+        d._children = d.children;
+        d.children = undefined;
+        d._children.forEach(collapse);
       }
     }
 
+    function highlightPath(d: HierarchyNode) {
+      g.selectAll("path.link").attr("stroke-opacity", 0.2);
+
+      let current: HierarchyNode | null = d;
+      const ids = new Set<string>();
+
+      while (current) {
+        ids.add(current.data.id);
+        current = current.parent as HierarchyNode;
+      }
+
+      g.selectAll<SVGPathElement, any>("path.link")
+        .filter((l: any) => ids.has(l.target.data.id))
+        .attr("stroke", "#6366f1")
+        .attr("stroke-width", 3)
+        .attr("stroke-opacity", 1);
+    }
+
     function update(source: HierarchyNode) {
-      const duration = initializedRef.current ? 500 : 0;
+      const duration = initializedRef.current ? 450 : 0;
       initializedRef.current = true;
 
       treeLayout(root);
 
+      if (root.descendants().length > 10000) {
+        root.eachBefore((d: any, i) => {
+          if (i > 10000 && d.children) {
+            d._children = d.children;
+            d.children = undefined;
+          }
+        });
+      }
+
       const nodes = root.descendants() as HierarchyNode[];
       const links = root.links();
 
-      // --- LINKS ---
-      const link = g.selectAll<SVGPathElement, d3.HierarchyPointLink<MindMapNode>>("path.link")
+      const link = g
+        .selectAll<SVGPathElement, any>("path.link")
         .data(links, (d: any) => d.target.data.id);
 
-      const linkEnter = link.enter()
+      const linkEnter = link
+        .enter()
         .append("path")
         .attr("class", "link")
         .attr("fill", "none")
-        .attr("stroke", "hsl(220, 13%, 85%)")
+        .attr("stroke", "#e5e7eb")
         .attr("stroke-width", 1.5)
         .attr("stroke-opacity", 0.6)
         .attr("d", () => {
@@ -122,120 +166,133 @@ export function MindMapGraph({ data }: Props) {
           return diagonal({ source: o, target: o } as any);
         });
 
-      linkEnter.merge(link)
+      linkEnter
+        .merge(link)
         .transition()
         .duration(duration)
         .attr("d", (d: any) => diagonal(d));
 
-      link.exit()
+      link
+        .exit()
         .transition()
         .duration(duration)
-        .attr("d", () => {
-          const o = { x: source.x!, y: source.y! };
-          return diagonal({ source: o, target: o } as any);
-        })
         .remove();
 
-      // --- NODES ---
-      const node = g.selectAll<SVGGElement, HierarchyNode>("g.node")
+      const node = g
+        .selectAll<SVGGElement, HierarchyNode>("g.node")
         .data(nodes, (d: any) => d.data.id);
 
-      const nodeEnter = node.enter()
+      const nodeEnter = node
+        .enter()
         .append("g")
         .attr("class", "node")
         .attr("transform", `translate(${source.y0 ?? 0},${source.x0 ?? 0})`)
         .attr("cursor", "pointer")
+
         .on("click", (_event, d) => {
+          highlightPath(d);
+
           if (d.data.type === "topic" && d.data.slug) {
             navigate(`/topic/${d.data.slug}`);
             return;
           }
-          if ((d as any)._children) {
-            d.children = (d as any)._children;
-            (d as any)._children = undefined;
+
+          if (d._children) {
+            d.children = d._children;
+            d._children = undefined;
           } else if (d.children) {
-            (d as any)._children = d.children;
-            d.children = undefined as any;
+            d._children = d.children;
+            d.children = undefined;
           }
+
           update(d);
+        })
+
+        .on("mouseover", (event, d) => {
+          d3.select(event.currentTarget)
+            .select("circle")
+            .transition()
+            .duration(150)
+            .attr("stroke-width", 3)
+            .attr("stroke", "#111");
+
+          tooltip
+            .style("opacity", 1)
+            .html(
+              `<strong>${d.data.label}</strong><br/>Type: ${d.data.type}`
+            );
+        })
+
+        .on("mousemove", (event) => {
+          tooltip
+            .style("left", event.pageX + 12 + "px")
+            .style("top", event.pageY + 12 + "px");
+        })
+
+        .on("mouseout", (event, d) => {
+          d3.select(event.currentTarget)
+            .select("circle")
+            .transition()
+            .duration(150)
+            .attr(
+              "stroke-width",
+              d.data.type === "root" || d.data.type === "track" ? 2.5 : 1.5
+            )
+            .attr(
+              "stroke",
+              d.data.type === "topic"
+                ? "hsl(220,13%,91%)"
+                : "hsl(221,83%,40%)"
+            );
+
+          tooltip.style("opacity", 0);
         });
 
-      // Node circle
-      nodeEnter.append("circle")
+      nodeEnter
+        .append("circle")
         .attr("r", 0)
         .attr("fill", (d) => nodeColors[d.data.type])
-        .attr("stroke", (d) => d.data.type === "topic" ? "hsl(220, 13%, 91%)" : "hsl(221, 83%, 40%)")
-        .attr("stroke-width", (d) => d.data.type === "root" || d.data.type === "track" ? 2.5 : 1.5)
+        .attr("stroke", "#1f2937")
         .attr("stroke-opacity", 0.4);
 
-      // Expand indicator
-      nodeEnter.append("text")
-        .attr("class", "expand-indicator")
-        .attr("text-anchor", "middle")
-        .attr("dy", "0.35em")
-        .attr("fill", "white")
-        .attr("font-size", (d) => Math.max(nodeRadius[d.data.type] * 0.8, 8))
-        .attr("font-weight", "bold")
-        .attr("pointer-events", "none");
-
-      // Label
-      nodeEnter.append("text")
+      nodeEnter
+        .append("text")
         .attr("class", "label")
         .attr("dy", (d) => nodeRadius[d.data.type] + 14)
         .attr("text-anchor", "middle")
-        .attr("fill", "hsl(220, 20%, 14%)")
         .attr("font-size", (d) => textSize[d.data.type])
-        .attr("font-weight", (d) => d.data.type === "track" || d.data.type === "root" ? "600" : "400")
-        .attr("pointer-events", "none")
+        .attr("fill", "#111827")
         .text((d) => truncate(d.data.label, 22));
 
-      // Icon/emoji for tracks
-      nodeEnter.filter((d) => !!d.data.icon)
+      nodeEnter
+        .filter((d) => !!d.data.icon)
         .append("text")
-        .attr("class", "icon")
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .attr("font-size", (d) => nodeRadius[d.data.type] * 0.9)
-        .attr("pointer-events", "none")
         .text((d) => d.data.icon || "");
 
-      // MERGE
       const nodeUpdate = nodeEnter.merge(node);
 
-      nodeUpdate.transition()
+      nodeUpdate
+        .transition()
         .duration(duration)
         .attr("transform", (d) => `translate(${d.y},${d.x})`);
 
-      nodeUpdate.select("circle")
+      nodeUpdate
+        .select("circle")
         .transition()
         .duration(duration)
-        .attr("r", (d) => nodeRadius[d.data.type])
-        .attr("fill", (d) => {
-          const hasHidden = !!(d as any)._children;
-          if (hasHidden) return nodeColors[d.data.type];
-          if (d.children) return adjustAlpha(nodeColors[d.data.type], 0.7);
-          return nodeColors[d.data.type];
-        });
+        .attr("r", (d) => {
+          const base = nodeRadius[d.data.type];
+          const children =
+            d.children?.length || d._children?.length || 0;
+          return base + Math.min(children * 0.8, 6);
+        })
+        .attr("fill", (d) => nodeColors[d.data.type]);
 
-      nodeUpdate.select(".expand-indicator")
-        .text((d) => {
-          if (d.data.icon) return "";
-          if ((d as any)._children) return "+";
-          if (d.children && d.children.length > 0) return "−";
-          return "";
-        });
+      node.exit().remove();
 
-      // EXIT
-      const nodeExit = node.exit()
-        .transition()
-        .duration(duration)
-        .attr("transform", `translate(${source.y!},${source.x!})`)
-        .remove();
-
-      nodeExit.select("circle").attr("r", 0);
-      nodeExit.select(".label").attr("fill-opacity", 0);
-
-      // Save positions
       nodes.forEach((d) => {
         d.x0 = d.x;
         d.y0 = d.y;
@@ -247,7 +304,6 @@ export function MindMapGraph({ data }: Props) {
 
   useEffect(() => {
     renderTree();
-
     const handleResize = () => renderTree();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -257,12 +313,18 @@ export function MindMapGraph({ data }: Props) {
     <svg
       ref={svgRef}
       className="w-full h-full bg-background"
-      style={{ minHeight: "100%" }}
+      style={{
+        minHeight: "100%",
+        willChange: "transform",
+      }}
     />
   );
 }
 
-function diagonal(d: { source: { x: number; y: number }; target: { x: number; y: number } }) {
+function diagonal(d: {
+  source: { x: number; y: number };
+  target: { x: number; y: number };
+}) {
   return `M${d.source.y},${d.source.x}
     C${(d.source.y + d.target.y) / 2},${d.source.x}
      ${(d.source.y + d.target.y) / 2},${d.target.x}
@@ -271,8 +333,4 @@ function diagonal(d: { source: { x: number; y: number }; target: { x: number; y:
 
 function truncate(str: string, max: number) {
   return str.length > max ? str.slice(0, max - 1) + "…" : str;
-}
-
-function adjustAlpha(hslStr: string, factor: number) {
-  return hslStr.replace(")", ` / ${factor})`).replace("hsl(", "hsla(");
 }

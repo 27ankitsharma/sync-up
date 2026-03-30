@@ -1,4 +1,5 @@
 import { defineType, defineField } from "sanity";
+import { orderRankField } from "@sanity/orderable-document-list";
 
 export default defineType({
   name: "track",
@@ -36,6 +37,8 @@ export default defineType({
       type: "string",
       description: "Emoji or icon identifier for this track",
     }),
+
+    orderRankField({ type: "track" })
   ],
   orderings: [
     {
