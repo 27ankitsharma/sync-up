@@ -23,7 +23,7 @@ export default function Radar() {
       if (topic.lastUpdated && new Date(topic.lastUpdated) >= weekAgo) {
         recent.push(topic);
       }
-      // Also group all by layer
+
       if (!rest[topic.layer]) rest[topic.layer] = [];
       rest[topic.layer].push(topic);
     }
@@ -32,16 +32,22 @@ export default function Radar() {
   }, [topics]);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bg-gradient-to-b from-background via-muted/10 to-background p-4 rounded-xl">
+      
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">AI Radar</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          AI Radar
+        </h1>
         <p className="text-muted-foreground mt-1">
           What's moving in AI — new updates this week, grouped by layer.
         </p>
       </div>
 
+      {/* Loading */}
       {isLoading && <GridSkeleton count={9} />}
 
+      {/* Error */}
       {isError && (
         <EmptyState
           icon="⚠️"
@@ -50,6 +56,7 @@ export default function Radar() {
         />
       )}
 
+      {/* Empty */}
       {!isLoading && !isError && (!topics || topics.length === 0) && (
         <EmptyState
           icon="📡"
@@ -58,6 +65,7 @@ export default function Radar() {
         />
       )}
 
+      {/* Content */}
       {!isLoading && topics && topics.length > 0 && (
         <>
           {/* New This Week */}
@@ -66,13 +74,17 @@ export default function Radar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
+              className="rounded-xl border border-border/40 bg-gradient-to-br from-primary/5 to-primary/10 p-6"
             >
               <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-xl font-bold text-foreground">🆕 New This Week</h2>
+                <h2 className="text-xl font-bold text-foreground">
+                  🆕 New This Week
+                </h2>
                 <Badge className="bg-primary/10 text-primary border-primary/20">
                   {newThisWeek.length}
                 </Badge>
               </div>
+
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {newThisWeek.map((t, i) => (
                   <TopicCard key={t._id} topic={t} index={i} />
@@ -88,11 +100,17 @@ export default function Radar() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
+              className="rounded-xl border border-border/40 bg-gradient-to-br from-muted/40 to-muted/10 p-6"
             >
               <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-lg font-semibold text-foreground">{layer}</h2>
-                <span className="text-xs text-muted-foreground">{layerTopics.length} topics</span>
+                <h2 className="text-lg font-semibold text-foreground">
+                  {layer}
+                </h2>
+                <span className="text-xs text-muted-foreground">
+                  {layerTopics.length} topics
+                </span>
               </div>
+
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {layerTopics.map((t, i) => (
                   <TopicCard key={t._id} topic={t} index={i} />
