@@ -195,7 +195,9 @@ export function MindMapGraph({ data }: Props) {
 
           if (d.data.type === "topic" && d.data.slug) {
             tooltip.style("opacity", 0);
-            navigate(`/topic/${d.data.slug}`);
+            //navigate(`/topic/${d.data.slug}`); // opens in same page
+            const url = `/topic/${d.data.slug}`;
+            window.open(url, "_blank", "noopener,noreferrer"); // opens in new tab
             return;
           }
 
@@ -220,9 +222,11 @@ export function MindMapGraph({ data }: Props) {
 
           tooltip
             .style("opacity", 1)
-            .html(
-              `<strong>${d.data.label}</strong><br/>Type: ${d.data.type}`
-            );
+            html(`
+              <strong>${d.data.label}</strong><br/>
+              Type: ${d.data.type}
+              ${d.data.type === "topic" ? "<br/>🔗 Opens in new tab" : ""}
+            `);
         })
 
         .on("mousemove", (event) => {
