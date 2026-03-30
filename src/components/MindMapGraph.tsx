@@ -92,6 +92,7 @@ export function MindMapGraph({ data }: Props) {
       .scaleExtent([0.2, 4])
       .on("zoom", (event) => {
         g.attr("transform", event.transform);
+        tooltip.style("opacity", 0);
       });
 
     svg.call(zoom);
@@ -193,6 +194,7 @@ export function MindMapGraph({ data }: Props) {
           highlightPath(d);
 
           if (d.data.type === "topic" && d.data.slug) {
+            tooltip.style("opacity", 0);
             navigate(`/topic/${d.data.slug}`);
             return;
           }
@@ -303,11 +305,22 @@ export function MindMapGraph({ data }: Props) {
   }, [data, navigate]);
 
   useEffect(() => {
-    renderTree();
-    const handleResize = () => renderTree();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [renderTree]);
+  renderTree();
+
+  const handleResize = () => renderTree();
+  window.addEventListener("resize", handleResize);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+
+    // 🧹 remove tooltip when component unmounts
+    if (tooltipRef.current) {
+      d3.select(tooltipRef.current).remove();
+      tooltipRef.current = null;
+    }
+  };
+}, [renderTree]);
+
 
   return (
     <svg
