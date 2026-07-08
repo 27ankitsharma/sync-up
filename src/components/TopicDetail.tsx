@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useTopic } from "@/hooks/useSanity";
+import { useMemo, useState } from "react";
+import { useTopic } from "@/hooks/useSyllabus";
 import { TopicPageSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +8,13 @@ import { TopicMeta } from "@/components/TopicMeta";
 import { Button } from "@/components/ui/button";
 import { LessonNav } from "@/components/LessonNav";
 import { hasQuizCompletion, recordQuizCompletion } from "@/lib/syncScore";
+import { localTopicToLegacyTopic } from "@/utils/syllabusAdapter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function TopicDetail({ slug }: { slug: string }) {
-  const { data: topic, isLoading, isError } = useTopic(slug);
+  const { data: localTopic, isLoading, isError } = useTopic(slug);
+  const topic = useMemo(() => (localTopic ? localTopicToLegacyTopic(localTopic) : undefined), [localTopic]);
   const [activeLessonIndex, setActiveLessonIndex] = useState<number | null>(null);
   const [completionVersion, setCompletionVersion] = useState(0);
 
