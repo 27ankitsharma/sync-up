@@ -7,12 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TopicMeta } from "@/components/TopicMeta";
 import { Button } from "@/components/ui/button";
 import { LessonNav } from "@/components/LessonNav";
+import { hasQuizCompletion, recordQuizCompletion } from "@/lib/syncScore";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export function TopicDetail({ slug }: { slug: string }) {
   const { data: topic, isLoading, isError } = useTopic(slug);
   const [activeLessonIndex, setActiveLessonIndex] = useState<number | null>(null);
+  const [completionVersion, setCompletionVersion] = useState(0);
 
   if (isLoading) return <TopicPageSkeleton />;
 
@@ -40,6 +42,13 @@ export function TopicDetail({ slug }: { slug: string }) {
   const activeLesson = activeLessonIndex !== null ? lessons[activeLessonIndex] : null;
   const hasPrev = activeLessonIndex !== null && activeLessonIndex > 0;
   const hasNext = activeLessonIndex !== null && activeLessonIndex < lessons.length - 1;
+  const isQuizLesson = activeLessonIndex === 0;
+  const isQuizCleared = completionVersion >= 0 && hasQuizCompletion("topic", topic.slug.current);
+
+  const clearQuiz = () => {
+    recordQuizCompletion("topic", topic.slug.current, topic.layer);
+    setCompletionVersion((version) => version + 1);
+  };
 
   return (
     <motion.div
@@ -174,6 +183,16 @@ export function TopicDetail({ slug }: { slug: string }) {
                       <h3 className="font-semibold text-foreground mb-3 text-lg">
                         {activeLessonIndex! + 1}. {activeLesson.title}
                       </h3>
+                      {isQuizLesson && (
+                        <div className="mb-4 rounded-md border border-primary/20 bg-primary/5 p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <p className="text-sm text-foreground">
+                            Clear this opening quiz to mark the topic complete for Overall Progress and Sync Score.
+                          </p>
+                          <Button size="sm" onClick={clearQuiz} disabled={isQuizCleared}>
+                            {isQuizCleared ? "Quiz cleared" : "Mark quiz cleared"}
+                          </Button>
+                        </div>
+                      )}
                       <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
                         {activeLesson.content?.map((block: any, j: number) => {
                           if (block._type === "block") {

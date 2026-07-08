@@ -1,14 +1,17 @@
 import { useMemo } from "react";
-import { useRadarTopics } from "@/hooks/useSanity";
+import { useRadar } from "@/hooks/useSyllabus";
 import { TopicCard } from "@/components/TopicCard";
 import { GridSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
+import { getSyncScoreHistory } from "@/lib/syncScore";
+import { localTopicToLegacyTopic } from "@/utils/syllabusAdapter";
 import { motion } from "framer-motion";
 import type { Topic } from "@/lib/types";
 
 export default function Radar() {
-  const { data: topics, isLoading, isError } = useRadarTopics();
+  const { data: radarTopics, isLoading, isError } = useRadar();
+  const topics = useMemo<Topic[] | undefined>(() => radarTopics?.map(localTopicToLegacyTopic), [radarTopics]);
 
   const { newThisWeek, byLayer } = useMemo(() => {
     if (!topics) return { newThisWeek: [], byLayer: {} as Record<string, Topic[]> };
@@ -30,6 +33,14 @@ export default function Radar() {
 
     return { newThisWeek: recent, byLayer: rest };
   }, [topics]);
+
+  const syncScoreByLayer = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(byLayer).map((layer) => [layer, getSyncScoreHistory(layer)]),
+      ),
+    [byLayer],
+  );
 
   return (
     <div className="space-y-10 bg-gradient-to-b from-background via-muted/10 to-background p-4 rounded-xl">
@@ -68,6 +79,51 @@ export default function Radar() {
       {/* Content */}
       {!isLoading && topics && topics.length > 0 && (
         <>
+          {/* Sync Score */}
+          {Object.entries(syncScoreByLayer).length > 0 && (
+            <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="space-y-4"
+            >
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Sync Score</h2>
+                <p className="text-sm text-muted-foreground">
+                  Last 8 weeks by layer. Scores update when radar-topic quizzes are cleared on this device.
+                </p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {Object.entries(syncScoreByLayer).map(([layer, history]) => {
+                  const latest = history[history.length - 1];
+                  return (
+                    <div key={layer} className="rounded-lg border bg-card p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h3 className="text-sm font-semibold text-foreground">{layer}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {latest.completed}/{latest.total} completed
+                          </p>
+                        </div>
+                        <Badge variant="secondary">{latest.score}%</Badge>
+                      </div>
+                      <div className="mt-4 flex items-end gap-1 h-10">
+                        {history.map((snapshot) => (
+                          <div
+                            key={snapshot.isoWeek}
+                            title={`${snapshot.isoWeek}: ${snapshot.score}%`}
+                            className="flex-1 rounded-sm bg-primary/70 min-h-1"
+                            style={{ height: `${Math.max(snapshot.score, 4)}%` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.section>
+          )}
+
           {/* New This Week */}
           {newThisWeek.length > 0 && (
             <motion.section

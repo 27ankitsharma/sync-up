@@ -25,7 +25,7 @@ const difficultyDot: Record<string, string> = {
 };
 
 export function SyllabusSidebar() {
-  const { state, hierarchy, isLoading, modulesForSubject, selectTopic } = useSyllabus();
+  const { state, hierarchy, isLoading, modulesForSubject, progressByNode, selectTopic } = useSyllabus();
   const { state: sidebarState } = useSidebar();
   const collapsed = sidebarState === "collapsed";
 
@@ -70,54 +70,73 @@ export function SyllabusSidebar() {
             )}
             <SidebarGroupContent>
               <SidebarMenu>
-                {modulesForSubject.map(({ module: mod, topics }) => (
-                  <Collapsible key={mod} defaultOpen>
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton className="font-medium text-sidebar-foreground hover:bg-sidebar-accent">
-                          <FolderClosed className="h-4 w-4 shrink-0 text-primary" />
-                          {!collapsed && (
-                            <>
-                              <span className="flex-1 truncate">{mod}</span>
-                              <Badge
-                                variant="secondary"
-                                className="ml-auto text-[10px] px-1.5 py-0 h-4 bg-sidebar-accent text-sidebar-foreground/70"
-                              >
-                                {topics.length}
-                              </Badge>
-                              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/40 transition-transform duration-200 group-data-[state=open]:rotate-90" />
-                            </>
-                          )}
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
+                {modulesForSubject.map(({ module: mod, topics }) => {
+                  const moduleSlug = topics[0]?.module?._id;
+                  const moduleProgress = moduleSlug ? progressByNode[`module:${moduleSlug}`] : undefined;
 
-                      {!collapsed && (
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {topics.map((topic) => {
-                              const isActive = state.selectedTopicSlug === topic.slug.current;
-                              return (
-                                <SidebarMenuSubItem key={topic._id}>
-                                  <SidebarMenuSubButton
-                                    onClick={() => selectTopic(topic.slug.current)}
-                                    isActive={isActive}
-                                    className="cursor-pointer"
+                  return (
+                    <Collapsible key={mod} defaultOpen>
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton className="font-medium text-sidebar-foreground hover:bg-sidebar-accent">
+                            <FolderClosed className="h-4 w-4 shrink-0 text-primary" />
+                            {!collapsed && (
+                              <>
+                                <span className="flex-1 truncate">{mod}</span>
+                                {moduleProgress && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[10px] px-1.5 py-0 h-4 text-sidebar-foreground/70"
                                   >
-                                    <FileText className="h-3.5 w-3.5 shrink-0" />
-                                    <span className="flex-1 truncate text-xs">{topic.title}</span>
-                                    <span
-                                      className={`h-2 w-2 rounded-full shrink-0 ${difficultyDot[topic.difficulty] || "bg-muted-foreground"}`}
-                                    />
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              );
-                            })}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      )}
-                    </SidebarMenuItem>
-                  </Collapsible>
-                ))}
+                                    {moduleProgress.percent}%
+                                  </Badge>
+                                )}
+                                <Badge
+                                  variant="secondary"
+                                  className="ml-auto text-[10px] px-1.5 py-0 h-4 bg-sidebar-accent text-sidebar-foreground/70"
+                                >
+                                  {topics.length}
+                                </Badge>
+                                <ChevronRight className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/40 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                              </>
+                            )}
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+
+                        {!collapsed && (
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {topics.map((topic) => {
+                                const isActive = state.selectedTopicSlug === topic.slug.current;
+                                const topicProgress = progressByNode[`topic:${topic.slug.current}`];
+                                return (
+                                  <SidebarMenuSubItem key={topic._id}>
+                                    <SidebarMenuSubButton
+                                      onClick={() => selectTopic(topic.slug.current)}
+                                      isActive={isActive}
+                                      className="cursor-pointer"
+                                    >
+                                      <FileText className="h-3.5 w-3.5 shrink-0" />
+                                      <span className="flex-1 truncate text-xs">{topic.title}</span>
+                                      {topicProgress && (
+                                        <span className="text-[10px] text-muted-foreground">
+                                          {topicProgress.percent}%
+                                        </span>
+                                      )}
+                                      <span
+                                        className={`h-2 w-2 rounded-full shrink-0 ${difficultyDot[topic.difficulty] || "bg-muted-foreground"}`}
+                                      />
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              })}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        )}
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

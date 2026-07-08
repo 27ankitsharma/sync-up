@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { sanityClient } from "@/lib/sanity";
+import { useSyllabus as useLocalSyllabus } from "@/hooks/useSyllabus";
 import type { Topic } from "@/lib/types";
+import { getProgressForSyllabus } from "@/lib/overallProgress";
+import type { OverallProgress } from "@/types/progress";
+import { localSyllabusToLegacyTopics } from "@/utils/syllabusAdapter";
 
 interface SyllabusState {
   track: string | null;
@@ -23,6 +25,7 @@ interface SyllabusContextValue {
   selectedTopic: Topic | null;
   subjectsForTrack: string[];
   modulesForSubject: { module: string; topics: Topic[] }[];
+  progressByNode: Record<string, OverallProgress>;
   setTrack: (track: string | null) => void;
   setSubject: (subject: string | null) => void;
   selectTopic: (slug: string | null) => void;
@@ -37,50 +40,12 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectedTopicSlug: null,
   });
 
-  const { data: allTopics, isLoading } = useQuery<Topic[]>({
-    queryKey: ["all-topics-hierarchy"],
-    queryFn: () =>
-      sanityClient.fetch(
-        `*[_type == "topic"]{
-          _id,
-          title,
-          slug,
-          roles,
-          difficulty,
-          layer,
-          status,
-          lastUpdated,
-          orderRank,
-          summary,
-          module->{
-            _id,
-            title,
-            orderRank,
-            subject->{
-              _id,
-              title,
-              orderRank,
-              track->{
-                _id,
-                title,
-                orderRank,
-                icon
-              }
-            }
-          }
-        }
-        | order(
-          module.subject.track.orderRank asc,
-          module.subject.orderRank asc,
-          module.orderRank asc,
-          orderRank asc
-        )`,
-      ),
-    staleTime: 0,
-  });
+  const { data: syllabus, isLoading } = useLocalSyllabus();
+  const allTopics = useMemo<Topic[]>(() => (syllabus ? localSyllabusToLegacyTopics(syllabus) : []), [syllabus]);
+  const progressByNode = useMemo(() => (syllabus ? getProgressForSyllabus(syllabus) : {}), [syllabus]);
 
   const hierarchy = useMemo<HierarchyData | null>(() => {
-    if (!allTopics) return null;
+    if (!allTopics.length) return null;
 
     const tracks: string[] = [];
     const subjects: Record<string, string[]> = {};
@@ -126,9 +91,13 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
 
     // ✅ Ensure topic order preserved
     Object.keys(topicsByModule).forEach((key) => {
-      topicsByModule[key].sort((a, b) =>
-        (a.orderRank || "").localeCompare(b.orderRank || "")
-      );
+      topicsByModule[key].sort((a, b) => {
+        if (a.orderRank || b.orderRank) {
+          return (a.orderRank || "").localeCompare(b.orderRank || "");
+        }
+
+        return (a.order || 0) - (b.order || 0);
+      });
     });
 
     return { tracks, subjects, modules, topicsByModule };
@@ -178,10 +147,8 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
   }, [hierarchy, state.track, state.subject]);
 
   const selectedTopic = useMemo(() => {
-    if (!allTopics || !state.selectedTopicSlug) return null;
-    return (
-      allTopics.find((t) => t.slug.current === state.selectedTopicSlug) || null
-    );
+    if (!allTopics.length || !state.selectedTopicSlug) return null;
+    return allTopics.find((t) => t.slug.current === state.selectedTopicSlug) || null;
   }, [allTopics, state.selectedTopicSlug]);
 
   const value: SyllabusContextValue = {
@@ -191,6 +158,7 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
     selectedTopic,
     subjectsForTrack,
     modulesForSubject,
+    progressByNode,
     setTrack,
     setSubject,
     selectTopic,

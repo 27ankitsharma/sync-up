@@ -1,33 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import { sanityClient } from "@/lib/sanity";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
 import { MindMapGraph, type MindMapNode } from "@/components/MindMapGraph";
 import type { Topic } from "@/lib/types";
+import { useSyllabus as useLocalSyllabus } from "@/hooks/useSyllabus";
+import { localSyllabusToLegacyTopics } from "@/utils/syllabusAdapter";
 
 export default function SyllabusMap() {
-  const { data: topics, isLoading } = useQuery<Topic[]>({
-    queryKey: ["syllabus-map-topics"],
-    queryFn: () =>
-    sanityClient.fetch(
-      `*[_type == "topic"]{
-          _id, title, slug,
-          module->{
-            _id, title, order,
-            subject->{
-              _id, title, order,
-              track->{ _id, title, order, icon }
-            }
-          }
-        }
-        | order(
-          module.subject.track.order asc,
-          module.subject.order asc,
-          module.order asc,
-          order asc
-        )`
-    )
-  });
+  const { data: syllabus, isLoading } = useLocalSyllabus();
+  const topics = useMemo<Topic[]>(() => (syllabus ? localSyllabusToLegacyTopics(syllabus) : []), [syllabus]);
 
   const tree = useMemo<MindMapNode | null>(() => {
     if (!topics || topics.length === 0) return null;

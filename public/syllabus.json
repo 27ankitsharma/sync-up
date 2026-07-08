@@ -1,0 +1,868 @@
+{
+  "tracks": [
+    {
+      "id": "artificial-intelligence-data-science",
+      "title": "Artificial Intelligence & Data Science",
+      "slug": "artificial-intelligence-data-science",
+      "order": 1,
+      "hasCourse": false,
+      "subjects": [
+        {
+          "id": "machine-learning",
+          "title": "Machine Learning",
+          "slug": "machine-learning",
+          "order": 1,
+          "hasCourse": false,
+          "modules": [
+            {
+              "id": "classical-ml",
+              "title": "Classical ML",
+              "slug": "classical-ml",
+              "order": 1,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "classical-ml-topic-1",
+                  "title": "Classical ML Topic 1",
+                  "slug": "classical-ml-topic-1",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W22",
+                  "summary": "Learn the essentials of classical ml topic 1.",
+                  "why_it_matters": "Classical ML Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "classical-ml-topic-2",
+                  "title": "Classical ML Topic 2",
+                  "slug": "classical-ml-topic-2",
+                  "layer": "Repositories",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W23",
+                  "summary": "Learn the essentials of classical ml topic 2.",
+                  "why_it_matters": "Classical ML Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "classical-ml-topic-3",
+                  "title": "Classical ML Topic 3",
+                  "slug": "classical-ml-topic-3",
+                  "layer": "Agents",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of classical ml topic 3.",
+                  "why_it_matters": "Classical ML Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            },
+            {
+              "id": "model-evaluation",
+              "title": "Model Evaluation",
+              "slug": "model-evaluation",
+              "order": 2,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "model-evaluation-topic-1",
+                  "title": "Model Evaluation Topic 1",
+                  "slug": "model-evaluation-topic-1",
+                  "layer": "Fundamentals",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W25",
+                  "summary": "Learn the essentials of model evaluation topic 1.",
+                  "why_it_matters": "Model Evaluation Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "model-evaluation-topic-2",
+                  "title": "Model Evaluation Topic 2",
+                  "slug": "model-evaluation-topic-2",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W26",
+                  "summary": "Learn the essentials of model evaluation topic 2.",
+                  "why_it_matters": "Model Evaluation Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "model-evaluation-topic-3",
+                  "title": "Model Evaluation Topic 3",
+                  "slug": "model-evaluation-topic-3",
+                  "layer": "Repositories",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of model evaluation topic 3.",
+                  "why_it_matters": "Model Evaluation Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "deep-learning",
+          "title": "Deep Learning",
+          "slug": "deep-learning",
+          "order": 2,
+          "hasCourse": false,
+          "modules": [
+            {
+              "id": "neural-networks",
+              "title": "Neural Networks",
+              "slug": "neural-networks",
+              "order": 1,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "neural-networks-topic-1",
+                  "title": "Neural Networks Topic 1",
+                  "slug": "neural-networks-topic-1",
+                  "layer": "Agents",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W28",
+                  "summary": "Learn the essentials of neural networks topic 1.",
+                  "why_it_matters": "Neural Networks Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "neural-networks-topic-2",
+                  "title": "Neural Networks Topic 2",
+                  "slug": "neural-networks-topic-2",
+                  "layer": "Fundamentals",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W21",
+                  "summary": "Learn the essentials of neural networks topic 2.",
+                  "why_it_matters": "Neural Networks Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "neural-networks-topic-3",
+                  "title": "Neural Networks Topic 3",
+                  "slug": "neural-networks-topic-3",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of neural networks topic 3.",
+                  "why_it_matters": "Neural Networks Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            },
+            {
+              "id": "transformers",
+              "title": "Transformers",
+              "slug": "transformers",
+              "order": 2,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "transformers-topic-1",
+                  "title": "Transformers Topic 1",
+                  "slug": "transformers-topic-1",
+                  "layer": "Repositories",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W23",
+                  "summary": "Learn the essentials of transformers topic 1.",
+                  "why_it_matters": "Transformers Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "transformers-topic-2",
+                  "title": "Transformers Topic 2",
+                  "slug": "transformers-topic-2",
+                  "layer": "Agents",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W24",
+                  "summary": "Learn the essentials of transformers topic 2.",
+                  "why_it_matters": "Transformers Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "transformers-topic-3",
+                  "title": "Transformers Topic 3",
+                  "slug": "transformers-topic-3",
+                  "layer": "Fundamentals",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of transformers topic 3.",
+                  "why_it_matters": "Transformers Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "generative-ai",
+          "title": "Generative AI",
+          "slug": "generative-ai",
+          "order": 3,
+          "hasCourse": false,
+          "modules": [
+            {
+              "id": "prompt-engineering",
+              "title": "Prompt Engineering",
+              "slug": "prompt-engineering",
+              "order": 1,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "prompt-engineering-topic-1",
+                  "title": "Prompt Engineering Topic 1",
+                  "slug": "prompt-engineering-topic-1",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W26",
+                  "summary": "Learn the essentials of prompt engineering topic 1.",
+                  "why_it_matters": "Prompt Engineering Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "prompt-engineering-topic-2",
+                  "title": "Prompt Engineering Topic 2",
+                  "slug": "prompt-engineering-topic-2",
+                  "layer": "Repositories",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W27",
+                  "summary": "Learn the essentials of prompt engineering topic 2.",
+                  "why_it_matters": "Prompt Engineering Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "prompt-engineering-topic-3",
+                  "title": "Prompt Engineering Topic 3",
+                  "slug": "prompt-engineering-topic-3",
+                  "layer": "Agents",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of prompt engineering topic 3.",
+                  "why_it_matters": "Prompt Engineering Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            },
+            {
+              "id": "rag-systems",
+              "title": "RAG Systems",
+              "slug": "rag-systems",
+              "order": 2,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "rag-systems-topic-1",
+                  "title": "RAG Systems Topic 1",
+                  "slug": "rag-systems-topic-1",
+                  "layer": "Fundamentals",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W21",
+                  "summary": "Learn the essentials of rag systems topic 1.",
+                  "why_it_matters": "RAG Systems Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "rag-systems-topic-2",
+                  "title": "RAG Systems Topic 2",
+                  "slug": "rag-systems-topic-2",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W22",
+                  "summary": "Learn the essentials of rag systems topic 2.",
+                  "why_it_matters": "RAG Systems Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "rag-systems-topic-3",
+                  "title": "RAG Systems Topic 3",
+                  "slug": "rag-systems-topic-3",
+                  "layer": "Repositories",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of rag systems topic 3.",
+                  "why_it_matters": "RAG Systems Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-engineering-analytics",
+      "title": "Data Engineering & Analytics",
+      "slug": "data-engineering-analytics",
+      "order": 2,
+      "hasCourse": false,
+      "subjects": [
+        {
+          "id": "data-engineering",
+          "title": "Data Engineering",
+          "slug": "data-engineering",
+          "order": 1,
+          "hasCourse": false,
+          "modules": [
+            {
+              "id": "pipelines",
+              "title": "Pipelines",
+              "slug": "pipelines",
+              "order": 1,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "pipelines-topic-1",
+                  "title": "Pipelines Topic 1",
+                  "slug": "pipelines-topic-1",
+                  "layer": "Agents",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W24",
+                  "summary": "Learn the essentials of pipelines topic 1.",
+                  "why_it_matters": "Pipelines Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "pipelines-topic-2",
+                  "title": "Pipelines Topic 2",
+                  "slug": "pipelines-topic-2",
+                  "layer": "Fundamentals",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W25",
+                  "summary": "Learn the essentials of pipelines topic 2.",
+                  "why_it_matters": "Pipelines Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "pipelines-topic-3",
+                  "title": "Pipelines Topic 3",
+                  "slug": "pipelines-topic-3",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of pipelines topic 3.",
+                  "why_it_matters": "Pipelines Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            },
+            {
+              "id": "warehouses",
+              "title": "Warehouses",
+              "slug": "warehouses",
+              "order": 2,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "warehouses-topic-1",
+                  "title": "Warehouses Topic 1",
+                  "slug": "warehouses-topic-1",
+                  "layer": "Repositories",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W27",
+                  "summary": "Learn the essentials of warehouses topic 1.",
+                  "why_it_matters": "Warehouses Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "warehouses-topic-2",
+                  "title": "Warehouses Topic 2",
+                  "slug": "warehouses-topic-2",
+                  "layer": "Agents",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W28",
+                  "summary": "Learn the essentials of warehouses topic 2.",
+                  "why_it_matters": "Warehouses Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "warehouses-topic-3",
+                  "title": "Warehouses Topic 3",
+                  "slug": "warehouses-topic-3",
+                  "layer": "Fundamentals",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of warehouses topic 3.",
+                  "why_it_matters": "Warehouses Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "analytics",
+          "title": "Analytics",
+          "slug": "analytics",
+          "order": 2,
+          "hasCourse": false,
+          "modules": [
+            {
+              "id": "bi-foundations",
+              "title": "BI Foundations",
+              "slug": "bi-foundations",
+              "order": 1,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "bi-foundations-topic-1",
+                  "title": "BI Foundations Topic 1",
+                  "slug": "bi-foundations-topic-1",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W22",
+                  "summary": "Learn the essentials of bi foundations topic 1.",
+                  "why_it_matters": "BI Foundations Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "bi-foundations-topic-2",
+                  "title": "BI Foundations Topic 2",
+                  "slug": "bi-foundations-topic-2",
+                  "layer": "Repositories",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W23",
+                  "summary": "Learn the essentials of bi foundations topic 2.",
+                  "why_it_matters": "BI Foundations Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "bi-foundations-topic-3",
+                  "title": "BI Foundations Topic 3",
+                  "slug": "bi-foundations-topic-3",
+                  "layer": "Agents",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of bi foundations topic 3.",
+                  "why_it_matters": "BI Foundations Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            },
+            {
+              "id": "experimentation",
+              "title": "Experimentation",
+              "slug": "experimentation",
+              "order": 2,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "experimentation-topic-1",
+                  "title": "Experimentation Topic 1",
+                  "slug": "experimentation-topic-1",
+                  "layer": "Fundamentals",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W25",
+                  "summary": "Learn the essentials of experimentation topic 1.",
+                  "why_it_matters": "Experimentation Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "experimentation-topic-2",
+                  "title": "Experimentation Topic 2",
+                  "slug": "experimentation-topic-2",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W26",
+                  "summary": "Learn the essentials of experimentation topic 2.",
+                  "why_it_matters": "Experimentation Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "experimentation-topic-3",
+                  "title": "Experimentation Topic 3",
+                  "slug": "experimentation-topic-3",
+                  "layer": "Repositories",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of experimentation topic 3.",
+                  "why_it_matters": "Experimentation Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mlops",
+          "title": "MLOps",
+          "slug": "mlops",
+          "order": 3,
+          "hasCourse": false,
+          "modules": [
+            {
+              "id": "model-deployment",
+              "title": "Model Deployment",
+              "slug": "model-deployment",
+              "order": 1,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "model-deployment-topic-1",
+                  "title": "Model Deployment Topic 1",
+                  "slug": "model-deployment-topic-1",
+                  "layer": "Agents",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W28",
+                  "summary": "Learn the essentials of model deployment topic 1.",
+                  "why_it_matters": "Model Deployment Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "model-deployment-topic-2",
+                  "title": "Model Deployment Topic 2",
+                  "slug": "model-deployment-topic-2",
+                  "layer": "Fundamentals",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W21",
+                  "summary": "Learn the essentials of model deployment topic 2.",
+                  "why_it_matters": "Model Deployment Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "model-deployment-topic-3",
+                  "title": "Model Deployment Topic 3",
+                  "slug": "model-deployment-topic-3",
+                  "layer": "Framework & Tooling",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of model deployment topic 3.",
+                  "why_it_matters": "Model Deployment Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            },
+            {
+              "id": "monitoring",
+              "title": "Monitoring",
+              "slug": "monitoring",
+              "order": 2,
+              "hasCourse": false,
+              "topics": [
+                {
+                  "id": "monitoring-topic-1",
+                  "title": "Monitoring Topic 1",
+                  "slug": "monitoring-topic-1",
+                  "layer": "Repositories",
+                  "difficulty": "Intermediate",
+                  "roles": [
+                    "AI Engineer",
+                    "Product Manager"
+                  ],
+                  "status": "published",
+                  "priority": "medium",
+                  "is_radar": true,
+                  "radar_week": "2026-W23",
+                  "summary": "Learn the essentials of monitoring topic 1.",
+                  "why_it_matters": "Monitoring Topic 1 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 1,
+                  "hasCourse": false
+                },
+                {
+                  "id": "monitoring-topic-2",
+                  "title": "Monitoring Topic 2",
+                  "slug": "monitoring-topic-2",
+                  "layer": "Agents",
+                  "difficulty": "Advanced",
+                  "roles": [
+                    "Data Analyst",
+                    "Data Engineer"
+                  ],
+                  "status": "coming_soon",
+                  "priority": "low",
+                  "is_radar": true,
+                  "radar_week": "2026-W24",
+                  "summary": "Learn the essentials of monitoring topic 2.",
+                  "why_it_matters": "Monitoring Topic 2 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 2,
+                  "hasCourse": false
+                },
+                {
+                  "id": "monitoring-topic-3",
+                  "title": "Monitoring Topic 3",
+                  "slug": "monitoring-topic-3",
+                  "layer": "Fundamentals",
+                  "difficulty": "Beginner",
+                  "roles": [
+                    "Data Scientist",
+                    "ML Engineer"
+                  ],
+                  "status": "published",
+                  "priority": "high",
+                  "is_radar": false,
+                  "radar_week": null,
+                  "summary": "Learn the essentials of monitoring topic 3.",
+                  "why_it_matters": "Monitoring Topic 3 matters because it helps learners connect concepts to practical AI work.",
+                  "order": 3,
+                  "hasCourse": false
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

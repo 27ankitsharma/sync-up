@@ -1,73 +1,149 @@
-# Welcome to your Lovable project
+# SyncRadar.ai
 
-## Project info
+SyncRadar.ai is an AI literacy platform built around SyncUp: LiveMap, Radar, AI-generated course content, and Sync Score. The app is knowledge-centric rather than course-centric, organizing learning as Track -> Subject -> Module -> Topic -> Lesson.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+This build is intentionally zero-backend: the frontend loads a generated static syllabus, reads course content from Sanity, and stores user progress on the current device with localStorage.
 
-## How can I edit this code?
+## Architecture
 
-There are several ways of editing your application.
+```text
+syllabus.xlsx
+  -> build_syllabus.py
+  -> public/syllabus.json
+  -> React frontend
+      -> LiveMap / syllabus navigation
+      -> Radar / Sync Score
+      -> localStorage progress utilities
 
-**Use Lovable**
+Sanity CMS
+  -> manually authored, quality-reviewed course content
+  -> frontend reads with GROQ through @sanity/client
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Future optional generation
+  -> hosted serverless function
+  -> LLM API + Sanity write token
+  -> writes approved course drafts into Sanity
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+There is no FastAPI, Express, or persistent backend server in this build.
 
-**Use your preferred IDE**
+## Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Install dependencies:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Start the frontend:
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```sh
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Run checks:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+npm run lint
+npm run test
+```
 
-**Use GitHub Codespaces**
+## Syllabus Workflow
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Edit `syllabus.xlsx` with these exact columns:
 
-## What technologies are used for this project?
+- `Track`
+- `Subject`
+- `Module`
+- `Topic`
+- `Layer`
+- `Difficulty`
+- `Roles`
+- `Status`
+- `Priority`
+- `Is_Radar`
+- `Radar_Week`
+- `Summary`
+- `Why_It_Matters`
 
-This project is built with:
+Then regenerate the static syllabus:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```sh
+python3 build_syllabus.py
+```
 
-## How can I deploy this project?
+The script writes `public/syllabus.json` and prints a summary like:
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```text
+Done: 2 tracks, 6 subjects, 12 modules, 36 topics exported to public/syllabus.json
+```
 
-## Can I connect a custom domain to my Lovable project?
+`Layer` is open-ended free text. Add new values directly in the workbook; the frontend groups and scores them dynamically.
 
-Yes, you can!
+## Sanity Configuration
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+The current frontend Sanity client lives in `src/lib/sanity.ts`. Configure:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- `VITE_SANITY_PROJECT_ID`
+- `VITE_SANITY_DATASET`
+
+The current project has these values hardcoded until env-based configuration is enabled:
+
+- Project ID: `x92kshl7`
+- Dataset: `production`
+
+Do not expose Sanity write tokens or LLM API keys in the browser. If automated generation is added later, put those secrets in a hosted serverless function and call that function from the frontend.
+
+## Course Content
+
+Course content is manually authored in Sanity for quality control. The helper in `src/lib/courseContent.ts` reads an expected `course` document by `nodeType` and `nodeSlug`; automated generation is intentionally a TODO.
+
+The first lesson of each course should be a quiz. Clearing that opening quiz records completion for progress and, for radar topics, Sync Score.
+
+## Adding a Radar Topic
+
+1. Add or edit a topic row in `syllabus.xlsx`.
+2. Set `Is_Radar` to `TRUE`.
+3. Set `Radar_Week` in ISO week format, for example `2026-W28`.
+4. Set `Layer`, `Difficulty`, `Roles`, `Status`, `Priority`, `Summary`, and `Why_It_Matters`.
+5. Run `python3 build_syllabus.py`.
+6. Restart or refresh the frontend.
+7. Add or update the related course content manually in Sanity when ready.
+
+## Sync Score vs Overall Progress
+
+Sync Score appears on the Radar page. It only considers radar topics within the rolling 8-week window, grouped by dynamic `Layer`, and stores weekly snapshots on the current device.
+
+Overall Progress appears in LiveMap. It counts all topic quiz completions regardless of Radar status or age, then aggregates modules, subjects, and tracks by completed topics divided by total topics.
+
+Both metrics currently live only in localStorage. They are device-specific and reset if the browser data is cleared. All storage reads and writes go through `src/lib/syncScore.ts` so a future Supabase-backed implementation can replace the storage layer without touching UI components.
+
+## Folder Structure
+
+```text
+build_syllabus.py
+syllabus.xlsx
+public/
+  syllabus.json
+src/
+  components/
+  contexts/
+  hooks/
+    useSyllabus.ts
+  lib/
+    courseContent.ts
+    overallProgress.ts
+    sanity.ts
+    syllabusData.ts
+    syncScore.ts
+  routes/
+  types/
+    course.ts
+    progress.ts
+    syllabus.ts
+  utils/
+    syllabusAdapter.ts
+sanity/
+  schemaTypes/
+  sanity.config.ts
+```
