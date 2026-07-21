@@ -4,7 +4,7 @@ import { TopicCard } from "@/components/TopicCard";
 import { GridSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Badge } from "@/components/ui/badge";
-import { getSyncScoreHistory } from "@/lib/syncScore";
+import { useSyncScoreByLayer } from "@/hooks/useUser";
 import { localTopicToLegacyTopic } from "@/utils/syllabusAdapter";
 import { motion } from "framer-motion";
 import type { Topic } from "@/lib/types";
@@ -34,13 +34,8 @@ export default function Radar() {
     return { newThisWeek: recent, byLayer: rest };
   }, [topics]);
 
-  const syncScoreByLayer = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.keys(byLayer).map((layer) => [layer, getSyncScoreHistory(layer)]),
-      ),
-    [byLayer],
-  );
+  const layers = useMemo(() => Object.keys(byLayer), [byLayer]);
+  const { data: syncScoreByLayer = {} } = useSyncScoreByLayer(layers);
 
   return (
     <div className="space-y-10 bg-gradient-to-b from-background via-muted/10 to-background p-4 rounded-xl">
@@ -90,7 +85,7 @@ export default function Radar() {
               <div>
                 <h2 className="text-xl font-bold text-foreground">Sync Score</h2>
                 <p className="text-sm text-muted-foreground">
-                  Last 8 weeks by layer. Scores update when radar-topic quizzes are cleared on this device.
+                  Last 8 weeks by layer. Sign in to save quiz progress and personalize these scores.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

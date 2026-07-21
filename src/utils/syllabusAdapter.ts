@@ -76,7 +76,7 @@ function buildDummyLessons(topic: TopicWithContext): LegacyTopic["lessons"] {
       duration: 5,
       content: portableParagraphs([
         `Quiz checkpoint for ${topic.title}.`,
-        "This is a placeholder quiz lesson. Replace it with reviewed quiz questions in Sanity when the final course content is authored.",
+        "This is a placeholder quiz lesson. Replace it with reviewed quiz questions in the canonical content source when the final course content is authored.",
       ]),
     },
     {

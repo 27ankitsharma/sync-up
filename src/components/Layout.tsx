@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SyllabusSidebar } from "@/components/SyllabusSidebar";
 import { SyllabusHeader } from "@/components/SyllabusHeader";
 import { SyllabusProvider } from "@/contexts/SyllabusContext";
+import { AuthNav } from "@/components/AuthNav";
 
 const navItems = [
   { path: "/", label: "Home" },
@@ -54,6 +55,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          <AuthNav />
         </nav>
       </div>
 

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTopic } from "@/hooks/useSyllabus";
 import { TopicPageSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
@@ -7,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TopicMeta } from "@/components/TopicMeta";
 import { Button } from "@/components/ui/button";
 import { LessonNav } from "@/components/LessonNav";
-import { hasQuizCompletion, recordQuizCompletion } from "@/lib/syncScore";
+import { useSaveQuizResult, useTopicCompletion } from "@/hooks/useUser";
 import { localTopicToLegacyTopic } from "@/utils/syllabusAdapter";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,7 +17,9 @@ export function TopicDetail({ slug }: { slug: string }) {
   const { data: localTopic, isLoading, isError } = useTopic(slug);
   const topic = useMemo(() => (localTopic ? localTopicToLegacyTopic(localTopic) : undefined), [localTopic]);
   const [activeLessonIndex, setActiveLessonIndex] = useState<number | null>(null);
-  const [completionVersion, setCompletionVersion] = useState(0);
+  const [quizMessage, setQuizMessage] = useState<string | null>(null);
+  const { data: isQuizCleared = false } = useTopicCompletion(localTopic?.slug ?? "");
+  const saveQuizResult = useSaveQuizResult();
 
   if (isLoading) return <TopicPageSkeleton />;
 
@@ -45,11 +48,23 @@ export function TopicDetail({ slug }: { slug: string }) {
   const hasPrev = activeLessonIndex !== null && activeLessonIndex > 0;
   const hasNext = activeLessonIndex !== null && activeLessonIndex < lessons.length - 1;
   const isQuizLesson = activeLessonIndex === 0;
-  const isQuizCleared = completionVersion >= 0 && hasQuizCompletion("topic", topic.slug.current);
 
-  const clearQuiz = () => {
-    recordQuizCompletion("topic", topic.slug.current, topic.layer);
-    setCompletionVersion((version) => version + 1);
+  const clearQuiz = async () => {
+    if (!localTopic) return;
+
+    try {
+      setQuizMessage(null);
+      await saveQuizResult.mutateAsync({
+        topicId: localTopic.id,
+        topicSlug: localTopic.slug,
+        layer: localTopic.layer,
+        score: 100,
+        passed: true,
+      });
+      setQuizMessage("Quiz cleared and progress saved.");
+    } catch (error) {
+      setQuizMessage(error instanceof Error ? error.message : "Unable to save quiz progress.");
+    }
   };
 
   return (
@@ -190,10 +205,23 @@ export function TopicDetail({ slug }: { slug: string }) {
                           <p className="text-sm text-foreground">
                             Clear this opening quiz to mark the topic complete for Overall Progress and Sync Score.
                           </p>
-                          <Button size="sm" onClick={clearQuiz} disabled={isQuizCleared}>
-                            {isQuizCleared ? "Quiz cleared" : "Mark quiz cleared"}
+                          <Button size="sm" onClick={clearQuiz} disabled={isQuizCleared || saveQuizResult.isPending}>
+                            {isQuizCleared ? "Quiz cleared" : saveQuizResult.isPending ? "Saving..." : "Mark quiz cleared"}
                           </Button>
                         </div>
+                      )}
+                      {quizMessage && (
+                        <p className="mb-4 text-xs text-muted-foreground">
+                          {quizMessage}
+                          {quizMessage.includes("signed in") && (
+                            <>
+                              {" "}
+                              <Link className="text-primary underline" to={`/login?redirect=/topic/${topic.slug.current}`}>
+                                Sign in here.
+                              </Link>
+                            </>
+                          )}
+                        </p>
                       )}
                       <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
                         {activeLesson.content?.map((block: any, j: number) => {

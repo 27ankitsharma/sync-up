@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import { useSyllabus as useLocalSyllabus } from "@/hooks/useSyllabus";
+import { useCompletedTopicSlugs } from "@/hooks/useUser";
 import type { Topic } from "@/lib/types";
 import { getProgressForSyllabus } from "@/lib/overallProgress";
 import type { OverallProgress } from "@/types/progress";
@@ -41,8 +42,12 @@ export function SyllabusProvider({ children }: { children: React.ReactNode }) {
   });
 
   const { data: syllabus, isLoading } = useLocalSyllabus();
+  const { data: completedTopicSlugs = [] } = useCompletedTopicSlugs();
   const allTopics = useMemo<Topic[]>(() => (syllabus ? localSyllabusToLegacyTopics(syllabus) : []), [syllabus]);
-  const progressByNode = useMemo(() => (syllabus ? getProgressForSyllabus(syllabus) : {}), [syllabus]);
+  const progressByNode = useMemo(
+    () => (syllabus ? getProgressForSyllabus(syllabus, completedTopicSlugs) : {}),
+    [completedTopicSlugs, syllabus],
+  );
 
   const hierarchy = useMemo<HierarchyData | null>(() => {
     if (!allTopics.length) return null;

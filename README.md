@@ -80,23 +80,26 @@ Done: 2 tracks, 6 subjects, 12 modules, 36 topics exported to public/syllabus.js
 
 `Layer` is open-ended free text. Add new values directly in the workbook; the frontend groups and scores them dynamically.
 
-## Sanity Configuration
+## Supabase Configuration
 
-The current frontend Sanity client lives in `src/lib/sanity.ts`. Configure:
+Create a Supabase project and configure these environment variables:
 
-- `VITE_SANITY_PROJECT_ID`
-- `VITE_SANITY_DATASET`
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
 
-The current project has these values hardcoded until env-based configuration is enabled:
+Run `supabase/schema.sql` in the Supabase SQL editor to create:
 
-- Project ID: `x92kshl7`
-- Dataset: `production`
+- `profiles`
+- `completed_topic`
+- `quiz_attempt`
+- `saved_topics`
+- `subscription`
 
-Do not expose Sanity write tokens or LLM API keys in the browser. If automated generation is added later, put those secrets in a hosted serverless function and call that function from the frontend.
+Supabase Auth owns user authentication. Application code should access auth/profile/progress through `AuthService` and `UserService`, not directly from React components.
 
 ## Course Content
 
-Course content is manually authored in Sanity for quality control. The helper in `src/lib/courseContent.ts` reads an expected `course` document by `nodeType` and `nodeSlug`; automated generation is intentionally a TODO.
+Course content is JSON-backed for the MVP. UI code should access content through `ContentService`, not by importing JSON directly.
 
 The first lesson of each course should be a quiz. Clearing that opening quiz records completion for progress and, for radar topics, Sync Score.
 
@@ -108,7 +111,7 @@ The first lesson of each course should be a quiz. Clearing that opening quiz rec
 4. Set `Layer`, `Difficulty`, `Roles`, `Status`, `Priority`, `Summary`, and `Why_It_Matters`.
 5. Run `python3 build_syllabus.py`.
 6. Restart or refresh the frontend.
-7. Add or update the related course content manually in Sanity when ready.
+7. Add or update related topic/course content in the canonical JSON source when ready.
 
 ## Sync Score vs Overall Progress
 
@@ -116,7 +119,7 @@ Sync Score appears on the Radar page. It only considers radar topics within the 
 
 Overall Progress appears in LiveMap. It counts all topic quiz completions regardless of Radar status or age, then aggregates modules, subjects, and tracks by completed topics divided by total topics.
 
-Both metrics currently live only in localStorage. They are device-specific and reset if the browser data is cleared. All storage reads and writes go through `src/lib/syncScore.ts` so a future Supabase-backed implementation can replace the storage layer without touching UI components.
+Both metrics are backed by Supabase for signed-in users. Anonymous users can browse content, but saved quiz progress and personalized metrics require authentication.
 
 ## Folder Structure
 
@@ -130,12 +133,16 @@ src/
   contexts/
   hooks/
     useSyllabus.ts
+    useUser.ts
   lib/
     courseContent.ts
     overallProgress.ts
-    sanity.ts
+    supabase.ts
     syllabusData.ts
-    syncScore.ts
+  services/
+    AuthService.ts
+    ContentService.ts
+    UserService.ts
   routes/
   types/
     course.ts

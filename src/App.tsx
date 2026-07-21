@@ -9,6 +9,7 @@ import Syllabus from "@/routes/Syllabus";
 import TopicPage from "@/routes/TopicPage";
 import Radar from "@/routes/Radar";
 import SyllabusMap from "@/routes/SyllabusMap";
+import Login from "@/routes/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/topic/:slug" element={<TopicPage />} />
             <Route path="/radar" element={<Radar />} />
             <Route path="/syllabus-map" element={<SyllabusMap />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
