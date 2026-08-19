@@ -12,19 +12,18 @@ export default function Home() {
         className="max-w-2xl"
       >
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
-          The Living{" "}
-          <span className="text-primary">AI Syllabus</span>
+          AI moves fast.{" "}
+          <span className="text-primary">Stay in sync.</span>
         </h1>
         <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
-          A continuously updated curriculum that tracks the AI landscape — from model releases to research breakthroughs.
-          Always current. Never static.
+          The Knowledge OS for AI professionals: LiveMap for orientation, Radar for what changed, and a persistent hub for what to learn next.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg" className="font-medium">
-            <Link to="/syllabus">Explore Syllabus</Link>
+            <Link to="/livemap">Explore LiveMap</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="font-medium">
-            <Link to="/radar">AI Radar</Link>
+            <Link to="/radar">Open Radar</Link>
           </Button>
         </div>
       </motion.div>

@@ -80,7 +80,7 @@ export interface UserServiceContract {
   removeSavedTopic(topicSlug: string): Promise<void>;
   getSubscription(): Promise<NewsletterSubscription | null>;
   saveSubscription(input: NewsletterSubscriptionInput): Promise<NewsletterSubscription>;
-  getSyncScore(): Promise<SyncScoreOverview>;
+  getSyncScore(selectedLens?: string | null): Promise<SyncScoreOverview>;
   getSyncScoreHistory(layer: string, weeksBack?: number): Promise<SyncScoreSnapshot[]>;
 }
 
@@ -304,7 +304,7 @@ class SupabaseUserService implements UserServiceContract {
     return mapSubscription(data as SubscriptionRow);
   }
 
-  async getSyncScore(): Promise<SyncScoreOverview> {
+  async getSyncScore(selectedLens: string | null = null): Promise<SyncScoreOverview> {
     const topics = await ContentService.getAllTopics();
     const attempts = await this.getQuizAttempts();
     const completedSlugs = new Set(await this.getCompletedTopicSlugs());
@@ -313,9 +313,16 @@ class SupabaseUserService implements UserServiceContract {
       if (!topic.is_radar || !topic.radar_week) return false;
       return isoWeekToDate(topic.radar_week) >= windowStart;
     });
-    const recentRadarSlugSet = new Set(recentRadarTopics.map((topic) => topic.slug));
-    const completedTopics = [...completedSlugs].filter((slug) => recentRadarSlugSet.has(slug)).length;
-    const relevantAttempts = attempts.filter((attempt) => recentRadarSlugSet.has(attempt.topicSlug));
+
+    // Role-scoped sync score: only consider radar topics that have lens relevance for the selected role.
+    // This keeps the denominator aligned with what the user is currently learning for.
+    const relevantTopics = selectedLens
+      ? recentRadarTopics.filter((topic) => Boolean(topic.lens_relevance?.[selectedLens]))
+      : recentRadarTopics;
+
+    const relevantSlugSet = new Set(relevantTopics.map((topic) => topic.slug));
+    const completedTopics = [...completedSlugs].filter((slug) => relevantSlugSet.has(slug)).length;
+    const relevantAttempts = attempts.filter((attempt) => relevantSlugSet.has(attempt.topicSlug));
     const quizAccuracy =
       relevantAttempts.length === 0
         ? 0
@@ -324,10 +331,10 @@ class SupabaseUserService implements UserServiceContract {
           );
 
     return {
-      importantTopics: recentRadarTopics.length,
+      importantTopics: relevantTopics.length,
       completedTopics,
       quizAccuracy,
-      syncScore: recentRadarTopics.length === 0 ? 0 : Math.round((completedTopics / recentRadarTopics.length) * 100),
+      syncScore: relevantTopics.length === 0 ? 0 : Math.round((completedTopics / relevantTopics.length) * 100),
     };
   }
 

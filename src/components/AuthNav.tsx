@@ -20,9 +20,12 @@ export function AuthNav() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden sm:inline max-w-40 truncate text-xs text-muted-foreground">
+      <Link
+        to="/profile"
+        className="hidden sm:inline max-w-40 truncate text-xs text-muted-foreground hover:text-foreground"
+      >
         {user.email}
-      </span>
+      </Link>
       <Button
         size="sm"
         variant="ghost"

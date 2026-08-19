@@ -6,9 +6,5 @@ export default function TopicPage() {
 
   if (!slug) return null;
 
-  return (
-    <div className="max-w-5xl mx-auto">
-      <TopicDetail slug={slug} />
-    </div>
-  );
+  return <TopicDetail slug={slug} />;
 }

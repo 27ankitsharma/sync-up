@@ -31,6 +31,14 @@ export function useTopic(slug: string) {
   });
 }
 
+export function useAllTopics() {
+  return useQuery({
+    queryKey: ["local-topics"],
+    queryFn: () => ContentService.getAllTopics(),
+    staleTime: ONE_HOUR,
+  });
+}
+
 export function useSearch(query: string) {
   const debouncedQuery = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
   const normalizedQuery = debouncedQuery.trim();
