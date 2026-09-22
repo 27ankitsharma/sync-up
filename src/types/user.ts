@@ -43,6 +43,14 @@ export interface QuizAttemptInput {
   answers?: Record<string, unknown> | null;
 }
 
+export interface LessonProgress {
+  id: string;
+  userId: string;
+  lessonId: string;
+  topicId: string;
+  completedAt: string;
+}
+
 export interface SavedTopic {
   id: string;
   userId: string;

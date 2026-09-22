@@ -75,6 +75,8 @@ export interface UserServiceContract {
   markTopicCompleted(topicId: string, topicSlug: string, layer?: string | null): Promise<CompletedTopic>;
   saveQuizResult(input: QuizAttemptInput): Promise<QuizAttempt>;
   getQuizAttempts(): Promise<QuizAttempt[]>;
+  getCompletedLessonIds(topicId: string): Promise<string[]>;
+  markLessonCompleted(lessonId: string, topicId: string): Promise<void>;
   getBookmarks(): Promise<SavedTopic[]>;
   saveTopic(topicId: string, topicSlug: string): Promise<SavedTopic>;
   removeSavedTopic(topicSlug: string): Promise<void>;
@@ -221,6 +223,38 @@ class SupabaseUserService implements UserServiceContract {
 
     if (error) throw error;
     return ((data ?? []) as QuizAttemptRow[]).map(mapQuizAttempt);
+  }
+
+  async getCompletedLessonIds(topicId: string): Promise<string[]> {
+    const user = await this.getCurrentUser();
+    if (!user || !topicId) return [];
+
+    const { data, error } = await requireSupabaseClient()
+      .from("lesson_progress")
+      .select("lesson_id")
+      .eq("user_id", user.id)
+      .eq("topic_id", topicId);
+
+    if (error) return [];
+    return ((data ?? []) as { lesson_id: string }[]).map((row) => row.lesson_id);
+  }
+
+  async markLessonCompleted(lessonId: string, topicId: string): Promise<void> {
+    const user = await this.getCurrentUser();
+    if (!user) return;
+    const { error } = await requireSupabaseClient()
+      .from("lesson_progress")
+      .upsert(
+        {
+          user_id: user.id,
+          lesson_id: lessonId,
+          topic_id: topicId,
+          completed_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,lesson_id" },
+      );
+
+    if (error) throw error;
   }
 
   async getBookmarks(): Promise<SavedTopic[]> {

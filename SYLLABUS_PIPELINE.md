@@ -57,6 +57,14 @@ can change without breaking topic identity or hierarchy references.
 - `Published`
 - `Archived`
 
+`Course_Status` and `Diagnostic_Status` (Topics sheet):
+
+- `yes` — learner UI shows **Active**
+- `no` — learner UI shows **Not available yet**
+- `WIP` — learner UI shows **Coming Soon**
+
+These control Start Learning and Take Diagnostic in Knowledge Hub. They are editorial availability flags, not hierarchy fields. Blank values default to `no`.
+
 `Is_Radar`:
 
 - `TRUE`
@@ -141,7 +149,7 @@ Do not delete rows unless you intentionally want to remove that item from genera
 - Missing or duplicate IDs.
 - Invalid hierarchy references.
 - Blank required hierarchy fields.
-- Invalid `Difficulty`, `Content_Status`, `Lens_Relevance`, or Radar dates.
+- Invalid `Difficulty`, `Content_Status`, `Course_Status`, `Diagnostic_Status`, `Lens_Relevance`, or Radar dates.
 - `Radar_End_Date` earlier than `Radar_Start_Date`.
 
 It warns on:

@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { KnowledgeSelectionProvider } from "@/contexts/KnowledgeSelectionContext";
 import { LensProvider } from "@/contexts/LensContext";
+import { RadarFilterProvider } from "@/contexts/RadarFilterContext";
+import { RadarSelectionProvider } from "@/contexts/RadarSelectionContext";
 import Home from "@/routes/Home";
 import Syllabus from "@/routes/Syllabus";
 import TopicPage from "@/routes/TopicPage";
@@ -24,18 +26,22 @@ const App = () => (
       <BrowserRouter>
         <KnowledgeSelectionProvider>
           <LensProvider>
-            <Routes>
-              <Route path="/" element={<Layout><Home /></Layout>} />
-              <Route path="/livemap" element={<Layout><Syllabus /></Layout>} />
-              <Route path="/syllabus" element={<Navigate to="/livemap" replace />} />
-              <Route path="/topic/:slug" element={<TopicPage />} />
-              <Route path="/topics/:slug" element={<TopicPage />} />
-              <Route path="/radar" element={<Layout><Radar /></Layout>} />
-              <Route path="/syllabus-map" element={<Navigate to="/livemap" replace />} />
-              <Route path="/login" element={<Layout><Login /></Layout>} />
-              <Route path="/profile" element={<Layout><Profile /></Layout>} />
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
-            </Routes>
+            <RadarFilterProvider>
+              <RadarSelectionProvider>
+              <Routes>
+                <Route path="/" element={<Layout variant="marketing"><Home /></Layout>} />
+                <Route path="/livemap" element={<Layout><Syllabus /></Layout>} />
+                <Route path="/syllabus" element={<Navigate to="/livemap" replace />} />
+                <Route path="/topic/:slug" element={<TopicPage />} />
+                <Route path="/topics/:slug" element={<TopicPage />} />
+                <Route path="/radar" element={<Layout><Radar /></Layout>} />
+                <Route path="/syllabus-map" element={<Navigate to="/livemap" replace />} />
+                <Route path="/login" element={<Layout><Login /></Layout>} />
+                <Route path="/profile" element={<Layout><Profile /></Layout>} />
+                <Route path="*" element={<Layout><NotFound /></Layout>} />
+              </Routes>
+              </RadarSelectionProvider>
+            </RadarFilterProvider>
           </LensProvider>
         </KnowledgeSelectionProvider>
       </BrowserRouter>

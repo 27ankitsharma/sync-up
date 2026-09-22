@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useKnowledgeSelection } from "@/contexts/KnowledgeSelectionContext";
 import { useLens } from "@/contexts/LensContext";
 import { useSyllabus } from "@/hooks/useSyllabus";
@@ -10,17 +16,18 @@ import {
   countRelevance,
   flattenSyllabusTopics,
   formatLearningTime,
-  relevanceBadgeClass,
+  relevanceBubbleTitle,
   relevanceColor,
-  relevanceLabel,
   relevancePercent,
+  sortRelevanceBubbles,
   summarizeBranchRelevance,
-  topicLearningHours,
+  topicKnowledgeLayer,
   topicRelevance,
   totalLearningHours,
+  type RelevanceCategory,
 } from "@/lib/syllabusMetrics";
-import type { Module, Subject, Topic, Track } from "@/types/syllabus";
-import { BookOpen, Boxes, CheckCircle2, ChevronRight, Circle, Clock, Hourglass, Layers3, ListTree, Search, ShieldCheck, Star } from "lucide-react";
+import { KNOWLEDGE_LAYERS, type KnowledgeLayer, type Module, type Subject, type Topic, type Track } from "@/types/syllabus";
+import { BookOpen, Boxes, CheckCircle2, ChevronRight, Circle, Clock, Layers3, ListTree, Radar, Search, ShieldCheck } from "lucide-react";
 
 export function LiveMapTree() {
   const { data: syllabus, isLoading } = useSyllabus();
@@ -31,6 +38,7 @@ export function LiveMapTree() {
   const [expandedSubjects, setExpandedSubjects] = useState<Set<string>>(new Set());
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [knowledgeLayerFilter, setKnowledgeLayerFilter] = useState<KnowledgeLayer | "all">("all");
   const [breadcrumbFocusActive, setBreadcrumbFocusActive] = useState(false);
   const completedTopics = new Set(completedTopicSlugs);
 
@@ -64,13 +72,15 @@ export function LiveMapTree() {
     return <div className="rounded-3xl border bg-card/70 p-8 text-muted-foreground">No knowledge map found.</div>;
   }
 
-  const visibleTracks = filterOptionalTopicsForLens(filterTracks(syllabus.tracks, searchQuery), selectedLens);
-  const allTopics = flattenSyllabusTopics({ tracks: visibleTracks });
-  const relevanceCounts = countRelevance(allTopics, selectedLens);
-  const completedLearningTime = allTopics
-    .filter((topic) => completedTopics.has(topic.slug))
-    .reduce((sum, topic) => sum + topicLearningHours(topic), 0);
-  const totalLearningTime = totalLearningHours(allTopics);
+  // Keep Optional topics so parent rows can show ⚪ bubbles from immediate children.
+  const visibleTracks = filterTracksByKnowledgeLayer(
+    filterTracks(syllabus.tracks, searchQuery),
+    knowledgeLayerFilter,
+  );
+  const overviewTopics = flattenSyllabusTopics(syllabus);
+  const relevanceCounts = countRelevance(overviewTopics, selectedLens);
+  const totalLearningTime = totalLearningHours(overviewTopics);
+  const radarActiveCount = overviewTopics.filter((topic) => topic.is_radar).length;
   const hasSearch = searchQuery.trim().length > 0;
   const shouldForceExpandSearchResults = hasSearch && !breadcrumbFocusActive;
   const allExpanded = expandedTracks.size > 0 && expandedSubjects.size > 0 && expandedModules.size > 0;
@@ -105,22 +115,33 @@ export function LiveMapTree() {
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
           <span className="font-semibold text-slate-600">{selectedLens} Lens:</span>
-          <LensKey color="bg-emerald-500" label="Must Learn" />
-          <LensKey color="bg-yellow-500" label="Good to Have" />
-          <LensKey color="bg-slate-400" label="Optional" />
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="font-medium text-slate-700">{relevanceCounts.Must.toLocaleString()} Must</span>
+            </span>
+            <span className="text-slate-300">·</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-yellow-500" />
+              <span className="font-medium text-slate-700">{relevanceCounts.Good.toLocaleString()} Good</span>
+            </span>
+            <span className="text-slate-300">·</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-slate-300 ring-1 ring-slate-400/40" />
+              <span className="font-medium text-slate-700">{relevanceCounts.Optional.toLocaleString()} Optional</span>
+            </span>
+          </span>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-6">
-          <MapStat icon={<Layers3 />} value={allTopics.length} label="Total Topics" />
-          <MapStat icon={<ShieldCheck />} value={relevanceCounts.Must} label="Must Learn" />
-          <MapStat icon={<Star />} value={relevanceCounts.Good} label="Good to Have" />
-          <MapStat icon={<Circle />} value={relevanceCounts.Optional} label="Optional" />
-          <MapStat icon={<Clock />} value={`${totalLearningTime}h`} label="Total Learning" />
-          <MapStat icon={<Hourglass />} value={`${Math.max(0, Math.round(totalLearningTime - completedLearningTime))}h`} label="Time Remaining" />
+        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+          <MapStat icon={<Layers3 />} value={overviewTopics.length.toLocaleString()} label="Total Topics" />
+          <MapStat icon={<ShieldCheck />} value={relevanceCounts.Must.toLocaleString()} label="Must Learn" />
+          <MapStat icon={<Clock />} value={`${totalLearningTime.toLocaleString()}h`} label="Total Learning" />
+          <MapStat icon={<Radar />} value={radarActiveCount.toLocaleString()} label="Radar Active" />
         </div>
-        <div className="mt-3 flex items-center gap-3 rounded-xl border border-violet-100 bg-white px-3">
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-violet-100 bg-white px-3 py-1.5">
           <Search className="h-4 w-4 text-muted-foreground" />
           <input
-            className="h-8 flex-1 bg-transparent text-xs outline-none"
+            className="h-8 min-w-[140px] flex-1 bg-transparent text-xs outline-none"
             placeholder="Search in LiveMap..."
             value={searchQuery}
             onChange={(event) => {
@@ -128,8 +149,24 @@ export function LiveMapTree() {
               setSearchQuery(event.target.value);
             }}
           />
+          <Select
+            value={knowledgeLayerFilter}
+            onValueChange={(value) => setKnowledgeLayerFilter(value as KnowledgeLayer | "all")}
+          >
+            <SelectTrigger className="h-8 w-[200px] border-violet-100 bg-violet-50/60 text-[11px] font-medium shadow-none">
+              <SelectValue placeholder="Knowledge Layer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Knowledge Layers</SelectItem>
+              {KNOWLEDGE_LAYERS.map((layer) => (
+                <SelectItem key={layer} value={layer}>
+                  {layer}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <span className="rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-slate-600">
-            {hasSearch ? `${visibleTracks.length} branches` : "All Topics"}
+            {hasSearch || knowledgeLayerFilter !== "all" ? `${visibleTracks.length} branches` : "All Topics"}
           </span>
         </div>
       </section>
@@ -137,13 +174,12 @@ export function LiveMapTree() {
       <div className="space-y-2">
         {visibleTracks.length === 0 ? (
           <div className="rounded-3xl border bg-card/70 p-8 text-muted-foreground">
-            No Must/Good topics found for this lens.
+            No matching topics found for this search or Knowledge Layer.
           </div>
         ) : (
           visibleTracks.map((track) => {
             const isExpanded = shouldForceExpandSearchResults || expandedTracks.has(track.slug);
             const trackTopics = topicsForTrack(track);
-            const trackRelevance = summarizeBranchRelevance(trackTopics, selectedLens);
             return (
               <Card
                 key={track.id}
@@ -166,16 +202,11 @@ export function LiveMapTree() {
                       {countTrackTopics(track)} topics · {totalLearningHours(trackTopics)} hours
                     </p>
                   </div>
-                  <div className="hidden min-w-[310px] grid-cols-3 gap-3 text-right lg:grid">
-                    <RowMetric label="Completed" value={`${countCompletedTrack(track, completedTopics)}/${countTrackTopics(track)}`} />
-                    <RowMetric label="Learning Time" value={`${totalLearningHours(trackTopics)}h`} />
-                    <RowMetric label="Status" value="Active" />
-                  </div>
-                  <Badge
-                    className={`rounded-full px-2 py-0.5 text-[10px] ${relevanceBadgeClass(trackRelevance)}`}
-                  >
-                    {relevanceLabel(trackRelevance)}
-                  </Badge>
+                  <CompletionProgress
+                    completed={countCompletedTrack(track, completedTopics)}
+                    total={countTrackTopics(track)}
+                  />
+                  <RelevanceBubbles categories={bubblesForTrack(track, selectedLens)} />
                 </button>
 
                 {isExpanded && (
@@ -260,12 +291,11 @@ function SubjectNode({
             {topicCount} topics · {totalLearningHours(subjectTopics)} hours · Relevance {relevance}%
           </p>
         </div>
-        <div className="hidden min-w-[310px] grid-cols-3 gap-3 text-right lg:grid">
-          <RowMetric label="Completed" value={`${countCompletedSubject(subject, completedTopics)}/${topicCount}`} />
-          <RowMetric label="Learning Time" value={`${totalLearningHours(subjectTopics)}h`} />
-          <RowMetric label="Status" value="Mapped" />
-        </div>
-        <ThinRelevance value={relevance} />
+        <CompletionProgress
+          completed={countCompletedSubject(subject, completedTopics)}
+          total={topicCount}
+        />
+        <RelevanceBubbles categories={bubblesForSubject(subject, selectedLens)} />
       </button>
 
       {isExpanded && (
@@ -340,12 +370,11 @@ function ModuleNode({
             {module.topics.length} topics · {totalLearningHours(module.topics)} hours · Relevance {relevance}%
           </p>
         </div>
-        <div className="hidden min-w-[310px] grid-cols-3 gap-3 text-right lg:grid">
-          <RowMetric label="Completed" value={`${countCompletedModule(module, completedTopics)}/${module.topics.length}`} />
-          <RowMetric label="Learning Time" value={`${totalLearningHours(module.topics)}h`} />
-          <RowMetric label="Status" value={countCompletedModule(module, completedTopics) === module.topics.length ? "Done" : "Open"} />
-        </div>
-        <ThinRelevance value={relevance} />
+        <CompletionProgress
+          completed={countCompletedModule(module, completedTopics)}
+          total={module.topics.length}
+        />
+        <RelevanceBubbles categories={bubblesForModule(module, selectedLens)} />
       </button>
 
       {isExpanded && (
@@ -406,16 +435,10 @@ function TopicNode({
       }
     >
       {completed ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <Circle className="h-4 w-4 text-muted-foreground" />}
-      <span className={`h-2.5 w-2.5 rounded-full ${relevanceColor(relevance)}`} />
       <span className="min-w-0 flex-1 truncate text-xs font-medium">{topic.title}</span>
-      <div className="hidden min-w-[310px] grid-cols-3 gap-3 text-right lg:grid">
-        <RowMetric label="Completed" value={completed ? "Yes" : "No"} />
-        <RowMetric label="Learning Time" value={learningTime} />
-        <RowMetric label="Status" value={topic.status} />
-      </div>
-      <Badge variant="outline" className="rounded-full px-2 py-0 text-[10px]">
-        {relevanceLabel(relevance)} · {learningTime}
-      </Badge>
+      <CompletionProgress completed={completed ? 1 : 0} total={1} compact />
+      <RelevanceBubbles categories={[relevance]} />
+      <span className="hidden text-[10px] text-muted-foreground sm:inline">{learningTime}</span>
     </button>
   );
 }
@@ -458,6 +481,63 @@ function LensKey({ color, label }: { color: string; label: string }) {
   );
 }
 
+function bubblesForTrack(track: Track, lens: string): RelevanceCategory[] {
+  return track.subjects.map((subject) => summarizeBranchRelevance(topicsForSubject(subject), lens));
+}
+
+function bubblesForSubject(subject: Subject, lens: string): RelevanceCategory[] {
+  return subject.modules.map((module) => summarizeBranchRelevance(module.topics, lens));
+}
+
+function bubblesForModule(module: Module, lens: string): RelevanceCategory[] {
+  return module.topics.map((topic) => topicRelevance(topic, lens));
+}
+
+function RelevanceBubbles({ categories }: { categories: RelevanceCategory[] }) {
+  if (categories.length === 0) return null;
+
+  const sorted = sortRelevanceBubbles(categories);
+  const title = relevanceBubbleTitle(sorted);
+
+  return (
+    <div
+      className="hidden max-w-[9.5rem] flex-wrap justify-end gap-0.5 sm:flex"
+      title={title}
+      aria-label={title}
+    >
+      {sorted.map((category, index) => (
+        <span
+          key={`${category}-${index}`}
+          className={`h-2 w-2 shrink-0 rounded-full ${
+            category === "Optional" ? "bg-slate-200 ring-1 ring-slate-400/50" : relevanceColor(category)
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function filterTracksByKnowledgeLayer(tracks: Track[], layer: KnowledgeLayer | "all"): Track[] {
+  if (layer === "all") return tracks;
+
+  return tracks
+    .map((track) => ({
+      ...track,
+      subjects: track.subjects
+        .map((subject) => ({
+          ...subject,
+          modules: subject.modules
+            .map((module) => ({
+              ...module,
+              topics: module.topics.filter((topic) => topicKnowledgeLayer(topic) === layer),
+            }))
+            .filter((module) => module.topics.length > 0),
+        }))
+        .filter((subject) => subject.modules.length > 0),
+    }))
+    .filter((track) => track.subjects.length > 0);
+}
+
 function filterTracks(tracks: Track[], query: string): Track[] {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) return tracks;
@@ -481,31 +561,8 @@ function filterTracks(tracks: Track[], query: string): Track[] {
   });
 }
 
-function filterOptionalTopicsForLens(tracks: Track[], selectedLens: string): Track[] {
-  return tracks
-    .map((track) => ({
-      ...track,
-      subjects: track.subjects
-        .map((subject) => ({
-          ...subject,
-          modules: subject.modules
-            .map((module) => ({
-              ...module,
-              topics: module.topics.filter((topic) => topicRelevance(topic, selectedLens) !== "Optional"),
-            }))
-            .filter((module) => module.topics.length > 0),
-        }))
-        .filter((subject) => subject.modules.length > 0),
-    }))
-    .filter((track) => track.subjects.length > 0);
-}
-
 function matchesQuery(value: string | undefined, query: string) {
   return Boolean(value?.toLowerCase().includes(query));
-}
-
-function countAllTopics(syllabus: { tracks: Track[] }) {
-  return syllabus.tracks.reduce((sum, track) => sum + countTrackTopics(track), 0);
 }
 
 function toggleSet(current: Set<string>, setNext: (value: Set<string>) => void, key: string) {
@@ -565,30 +622,42 @@ function countCompletedModule(module: Module, completedTopics: Set<string>) {
   return module.topics.filter((topic) => completedTopics.has(topic.slug)).length;
 }
 
-function Relevance({ value }: { value: number }) {
-  return (
-    <div className="hidden sm:block w-28">
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${value}%` }} />
+function CompletionProgress({
+  completed,
+  total,
+  compact = false,
+}: {
+  completed: number;
+  total: number;
+  compact?: boolean;
+}) {
+  const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+  if (compact) {
+    return (
+      <div className="hidden w-20 lg:block" title={`${percent}% complete`}>
+        <div className="h-1.5 overflow-hidden rounded-full bg-violet-100">
+          <div
+            className="h-full rounded-full bg-primary transition-[width]"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
       </div>
-      <p className="mt-1 text-right text-[10px] text-muted-foreground">Relevance {value}%</p>
-    </div>
-  );
-}
+    );
+  }
 
-function RowMetric({ label, value }: { label: string; value: string }) {
   return (
-    <span>
-      <span className="block text-[10px] text-muted-foreground">{label}</span>
-      <span className="block text-xs font-semibold capitalize">{value}</span>
-    </span>
-  );
-}
-
-function ThinRelevance({ value }: { value: number }) {
-  return (
-    <div className="hidden sm:block h-8 w-1 overflow-hidden rounded-full bg-muted">
-      <div className="w-full rounded-full bg-primary" style={{ height: `${value}%` }} />
+    <div className="hidden w-28 shrink-0 lg:block">
+      <div className="mb-1 flex items-center justify-between gap-2 text-[10px] text-muted-foreground">
+        <span>Completed</span>
+        <span className="font-medium text-slate-600">{percent}%</span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-violet-100">
+        <div
+          className="h-full rounded-full bg-primary transition-[width]"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
     </div>
   );
 }

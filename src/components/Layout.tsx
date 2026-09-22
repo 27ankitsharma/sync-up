@@ -1,51 +1,134 @@
+import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthNav } from "@/components/AuthNav";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
 import { MyContextSidebar } from "@/components/knowledge/MyContextSidebar";
 import { useLens } from "@/contexts/LensContext";
-import { useSyncScoreOverview } from "@/hooks/useUser";
+import { useAuthUser } from "@/hooks/useAuth";
+import { useSyncScoreOverview, useProgress } from "@/hooks/useUser";
 import { Bell, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const navItems = [
+const appNavItems = [
   { path: "/livemap", label: "LiveMap" },
   { path: "/radar", label: "Radar" },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+const publicNavItems = [
+  { path: "/livemap", label: "LiveMap" },
+  { path: "/radar", label: "Radar" },
+  { path: "/#about", label: "About" },
+];
+
+export function Layout({
+  children,
+  variant = "app",
+}: {
+  children: ReactNode;
+  variant?: "app" | "marketing";
+}) {
   return (
     <div className="min-h-screen bg-[#fbfaff] font-sans">
       <AppHeader />
-      <div className="flex min-h-[calc(100vh-60px)] gap-3 p-3">
-        <MyContextSidebar />
-        <main className="min-w-0 flex-1">{children}</main>
-        <KnowledgeHub />
-      </div>
+      {variant === "marketing" ? (
+        <div className="min-h-[calc(100vh-60px)]">{children}</div>
+      ) : (
+        <div className="flex min-h-[calc(100vh-60px)] gap-3 p-3">
+          <MyContextSidebar />
+          <main className="min-w-0 w-full max-w-[620px] shrink grow-0">{children}</main>
+          <KnowledgeHub />
+        </div>
+      )}
     </div>
   );
 }
 
 export function AppHeader() {
+  const { data: user, isLoading } = useAuthUser();
+  const isAuthenticated = Boolean(user);
+
+  if (isLoading || !isAuthenticated) {
+    return <PublicHeader />;
+  }
+
+  return <AuthenticatedHeader />;
+}
+
+function BrandLink() {
+  return (
+    <Link to="/" className="flex w-44 items-center gap-3 shrink-0">
+      <img
+        src="/syncradar-icon.png"
+        alt="SyncRadar"
+        className="h-9 w-9 shrink-0 rounded-2xl object-cover shadow-sm"
+      />
+      <span>
+        <span className="block text-sm font-bold leading-none tracking-tight">SyncRadar</span>
+        <span className="block text-[10px] text-muted-foreground">Stay in sync with AI</span>
+      </span>
+    </Link>
+  );
+}
+
+function PublicHeader() {
+  const { pathname, hash } = useLocation();
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-violet-100/70 bg-white/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-[60px] max-w-[1680px] items-center gap-3 px-5">
+        <BrandLink />
+        <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+          {publicNavItems.map(({ path, label }) => {
+            const isActive = path === "/#about" ? pathname === "/" && hash === "#about" : pathname === path;
+            return (
+              <Link
+                key={path}
+                to={path}
+                className={cn(
+                  "relative shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button asChild size="sm" variant="ghost" className="h-8">
+            <Link to="/login">Sign In</Link>
+          </Button>
+          <Button asChild size="sm" className="h-8 rounded-full px-4">
+            <Link to="/login?redirect=/livemap">Get Started</Link>
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function AuthenticatedHeader() {
   const { pathname } = useLocation();
   const { selectedLens } = useLens();
   const { data: syncScore } = useSyncScoreOverview(selectedLens);
+  const { data: progress = [] } = useProgress();
+  const syncBadgeLabel =
+    !syncScore || syncScore.importantTopics === 0 || progress.length === 0
+      ? "Not assessed"
+      : `${syncScore.syncScore}%`;
 
   return (
     <header className="sticky top-0 z-50 border-b border-violet-100/70 bg-white/85 backdrop-blur-xl">
       <div className="flex h-[60px] items-center gap-4 px-5">
-        <Link to="/livemap" className="flex w-44 items-center gap-3 shrink-0">
-          <span className="grid h-9 w-9 place-items-center rounded-2xl bg-violet-100 text-primary shadow-sm">⌘</span>
-          <span>
-            <span className="block text-sm font-bold leading-none tracking-tight">SyncRadar</span>
-            <span className="block text-[10px] text-muted-foreground">Stay in sync with AI</span>
-          </span>
-        </Link>
+        <BrandLink />
 
         <nav className="flex items-center gap-1">
-          {navItems.map(({ path, label }) => {
-            const isActive = pathname === path || (path === "/livemap" && pathname === "/");
+          {appNavItems.map(({ path, label }) => {
+            const isActive = pathname === path;
             return (
               <Link
                 key={path}
@@ -78,7 +161,7 @@ export function AppHeader() {
 
         <div className="flex items-center gap-2">
           <Badge className="hidden lg:inline-flex rounded-xl bg-emerald-50 px-3 py-1.5 text-emerald-700 hover:bg-emerald-50">
-            Sync {syncScore?.syncScore ?? 87}%
+            Sync {syncBadgeLabel}
           </Badge>
           <button className="hidden lg:grid h-9 w-9 place-items-center rounded-xl border border-violet-100 bg-white text-muted-foreground hover:text-foreground">
             <Bell className="h-4 w-4" />

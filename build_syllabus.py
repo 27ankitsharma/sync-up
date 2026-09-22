@@ -127,6 +127,8 @@ TOPIC_COLUMNS = [
     "Why_It_Matters",
     "Resources",
     "Content_Status",
+    "Course_Status",
+    "Diagnostic_Status",
     "Is_Radar",
     "Radar_Start_Date",
     "Radar_End_Date",
@@ -134,7 +136,16 @@ TOPIC_COLUMNS = [
 
 VALID_DIFFICULTIES = {"Beginner", "Intermediate", "Advanced"}
 VALID_CONTENT_STATUSES = {"Draft", "Published", "Archived"}
+VALID_AVAILABILITY_STATUSES = {"yes", "no", "WIP"}
+AVAILABILITY_ALIASES = {"yes": "yes", "no": "no", "wip": "WIP"}
 VALID_RELEVANCE = {"Must", "Good", "Optional"}
+VALID_KNOWLEDGE_LAYERS = {
+    "Foundations",
+    "Models & Architectures",
+    "Techniques & Practices",
+    "Systems & Applications",
+    "Frontiers & Emerging",
+}
 STATUS_TO_JSON = {"Draft": "draft", "Published": "published", "Archived": "archived"}
 LEGACY_STATUS_MAP = {
     "draft": "Draft",
@@ -358,6 +369,8 @@ def migrate_legacy_workbook(path: Path, log: BuildIssueLog) -> None:
                 "Why_It_Matters": row["Why_It_Matters"].strip(),
                 "Resources": "",
                 "Content_Status": LEGACY_STATUS_MAP.get(row["Status"].strip().lower(), "Draft"),
+                "Course_Status": "yes" if LEGACY_STATUS_MAP.get(row["Status"].strip().lower(), "Draft") == "Published" else "no",
+                "Diagnostic_Status": "yes" if LEGACY_STATUS_MAP.get(row["Status"].strip().lower(), "Draft") == "Published" else "no",
                 "Is_Radar": row["Is_Radar"].strip(),
                 "Radar_Start_Date": radar_start_date,
                 "Radar_End_Date": "",
@@ -459,11 +472,59 @@ def parse_content_status(value: str, label: str, log: BuildIssueLog) -> str:
     return normalized
 
 
+def parse_availability_status(value: str, column: str, label: str, log: BuildIssueLog) -> str:
+    normalized = value.strip()
+    if not normalized:
+        return "no"
+    mapped = AVAILABILITY_ALIASES.get(normalized.lower())
+    if mapped is None:
+        log.error(f"{label}: {column} must be one of yes, no, WIP")
+        return "no"
+    return mapped
+
+
+def ensure_topic_availability_columns(path: Path) -> None:
+    """Add Course_Status and Diagnostic_Status to Topics if the workbook predates them.
+
+    Existing topic rows are initialized to yes so current learning experiences stay reachable.
+    Blank values in later authoring default to no.
+    """
+    wb = load_workbook(path)
+    if "Topics" not in wb.sheetnames:
+        return
+
+    ws = wb["Topics"]
+    changed = False
+    for column, after in (("Course_Status", "Content_Status"), ("Diagnostic_Status", "Course_Status")):
+        headers = [cell.value for cell in ws[1]]
+        if column in headers:
+            continue
+        insert_at = headers.index(after) + 2 if after in headers else len(headers) + 1
+        ws.insert_cols(insert_at)
+        ws.cell(1, insert_at).value = column
+        for row_index in range(2, ws.max_row + 1):
+            if any(cell_value(ws.cell(row_index, col_index).value) for col_index in range(1, ws.max_column + 1)):
+                ws.cell(row_index, insert_at).value = "yes"
+        changed = True
+
+    if changed:
+        wb.save(path)
+    wb.close()
+
+
 def parse_difficulty(value: str, label: str, log: BuildIssueLog) -> str:
     if value not in VALID_DIFFICULTIES:
         log.error(f"{label}: Difficulty must be one of {sorted(VALID_DIFFICULTIES)}")
         return "Beginner"
     return value
+
+
+def parse_knowledge_layer(value: str, label: str, log: BuildIssueLog) -> str:
+    normalized = value.strip()
+    if normalized not in VALID_KNOWLEDGE_LAYERS:
+        log.error(f"{label}: Knowledge_Layer must be one of {sorted(VALID_KNOWLEDGE_LAYERS)}")
+        return normalized
+    return normalized
 
 
 def parse_learning_time(value: str, label: str, log: BuildIssueLog) -> float | None:
@@ -706,7 +767,10 @@ def build_syllabus(
         module_title = module["title"]
 
         difficulty = parse_difficulty(require_value(row, "Difficulty", label, log), label, log)
+        knowledge_layer = parse_knowledge_layer(require_value(row, "Knowledge_Layer", label, log), label, log)
         content_status = parse_content_status(require_value(row, "Content_Status", label, log), label, log)
+        course_status = parse_availability_status(row.get("Course_Status", ""), "Course_Status", label, log)
+        diagnostic_status = parse_availability_status(row.get("Diagnostic_Status", ""), "Diagnostic_Status", label, log)
         learning_time = parse_learning_time(row.get("Learning_Time", ""), label, log)
         lens_relevance = parse_lens_relevance(row.get("Lens_Relevance", ""), label, log)
         radar_start = parse_date(row.get("Radar_Start_Date", ""), label, "Radar_Start_Date", log)
@@ -742,8 +806,8 @@ def build_syllabus(
             "subject_id": subject["id"],
             "module_id": module["id"],
             "slug": slugify(topic_title),
-            "layer": require_value(row, "Knowledge_Layer", label, log),
-            "knowledge_layer": row.get("Knowledge_Layer", "").strip(),
+            "layer": knowledge_layer,
+            "knowledge_layer": knowledge_layer,
             "difficulty": difficulty,
             "learning_time": learning_time,
             "lens_relevance": lens_relevance,
@@ -759,7 +823,9 @@ def build_syllabus(
             "why_it_matters": row.get("Why_It_Matters", "").strip(),
             "resources": parse_resources(row.get("Resources", ""), label, log),
             "order": len(topics_by_module[module["id"]]) + 1,
-            "hasCourse": False,
+            "course_status": course_status,
+            "diagnostic_status": diagnostic_status,
+            "hasCourse": course_status == "yes",
         }
         topics_by_module[module["id"]].append(topic)
 
@@ -976,6 +1042,8 @@ def main() -> int:
 
         if not has_target_workbook(INPUT_FILE):
             migrate_legacy_workbook(INPUT_FILE, log)
+
+        ensure_topic_availability_columns(INPUT_FILE)
 
         track_rows = load_workbook_rows(INPUT_FILE, "Tracks", TRACK_COLUMNS)
         subject_rows = load_workbook_rows(INPUT_FILE, "Subjects", SUBJECT_COLUMNS)

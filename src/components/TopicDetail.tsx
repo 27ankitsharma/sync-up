@@ -1,29 +1,47 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useTopic } from "@/hooks/useSyllabus";
+import { usePublishedCourse } from "@/hooks/useCourse";
 import { TopicPageSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
 import { Card, CardContent } from "@/components/ui/card";
-import { TopicMeta } from "@/components/TopicMeta";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LessonNav } from "@/components/LessonNav";
+import { LessonCanvas } from "@/components/LessonCanvas";
+import { CourseContextSidebar } from "@/components/CourseContextSidebar";
 import { AppHeader } from "@/components/Layout";
-import { useKnowledgeSelection } from "@/contexts/KnowledgeSelectionContext";
-import { useSaveQuizResult, useTopicCompletion } from "@/hooks/useUser";
+import { useCompletedLessonIds, useMarkLessonCompleted, useSaveQuizResult, useTopicCompletion } from "@/hooks/useUser";
 import { localTopicToLegacyTopic } from "@/utils/syllabusAdapter";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  availabilityUiLabel,
+  isAvailabilityActive,
+  topicCourseStatus,
+  topicDiagnosticStatus,
+} from "@/lib/knowledgeHub";
+import { ChevronDown } from "lucide-react";
 
 export function TopicDetail({ slug }: { slug: string }) {
   const [searchParams] = useSearchParams();
-  const { setSelectedObject } = useKnowledgeSelection();
   const { data: localTopic, isLoading, isError } = useTopic(slug);
   const topic = useMemo(() => (localTopic ? localTopicToLegacyTopic(localTopic) : undefined), [localTopic]);
   const shouldOpenQuiz = searchParams.get("lesson") === "quiz";
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
   const [quizMessage, setQuizMessage] = useState<string | null>(null);
+  const [mobileLessonsOpen, setMobileLessonsOpen] = useState(false);
+  const [mobileContextOpen, setMobileContextOpen] = useState(false);
   const { data: isQuizCleared = false } = useTopicCompletion(localTopic?.slug ?? "");
   const saveQuizResult = useSaveQuizResult();
+  const courseStatus = topicCourseStatus(localTopic);
+  const diagnosticStatus = topicDiagnosticStatus(localTopic);
+  const courseActive = isAvailabilityActive(courseStatus);
+  const diagnosticActive = isAvailabilityActive(diagnosticStatus);
+  const { data: courseResult, isLoading: courseLoading, isError: courseError } = usePublishedCourse(
+    courseActive ? localTopic?.id : null,
+  );
+  const publishedLessons = courseResult?.status === "ok" ? courseResult.lessons : [];
+  const { data: completedLessonIds = [] } = useCompletedLessonIds(localTopic?.id);
+  const markLessonCompleted = useMarkLessonCompleted();
 
   if (isLoading) return <TopicPageSkeleton />;
 
@@ -47,13 +65,51 @@ export function TopicDetail({ slug }: { slug: string }) {
     );
   }
 
-  const lessons = topic.lessons || [];
-  const diagnosticLesson = lessons.find((lesson) => /quiz|diagnostic|readiness/i.test(lesson.title)) ?? null;
-  const learningLessons = diagnosticLesson ? lessons.filter((lesson) => lesson._id !== diagnosticLesson._id) : lessons;
+  const learningLessons = courseActive ? publishedLessons : [];
   const safeActiveLessonIndex = learningLessons.length ? Math.min(activeLessonIndex, learningLessons.length - 1) : null;
   const activeLesson = safeActiveLessonIndex !== null ? learningLessons[safeActiveLessonIndex] : null;
-  const hasPrev = safeActiveLessonIndex !== null && safeActiveLessonIndex > 0;
-  const hasNext = safeActiveLessonIndex !== null && safeActiveLessonIndex < learningLessons.length - 1;
+  const totalMinutes = learningLessons.reduce((sum, lesson) => sum + (lesson.durationMinutes ?? 0), 0);
+
+  const selectLesson = (index: number) => {
+    if (!learningLessons.length) return;
+    const nextIndex = Math.max(0, Math.min(index, learningLessons.length - 1));
+    setActiveLessonIndex(nextIndex);
+    setMobileLessonsOpen(false);
+    const lesson = learningLessons[nextIndex];
+    if (localTopic && lesson) {
+      markLessonCompleted.mutate({ lessonId: lesson.id, topicId: localTopic.id });
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const courseUnavailableState = (() => {
+    if (!courseActive) {
+      return {
+        title: availabilityUiLabel(courseStatus),
+        description: `Course status: ${availabilityUiLabel(courseStatus)}. Diagnostic status: ${availabilityUiLabel(diagnosticStatus)}.`,
+      };
+    }
+    if (courseLoading) return null;
+    if (courseError || courseResult?.status === "error") {
+      return {
+        title: "Content failed to load",
+        description: "We couldn't load this course right now. Please try again later.",
+      };
+    }
+    if (courseResult?.status === "none") {
+      return {
+        title: "Learning content not available",
+        description: "This topic is marked available, but no published course is attached yet.",
+      };
+    }
+    if (learningLessons.length === 0) {
+      return {
+        title: "No published lessons",
+        description: "This course exists, but it has no published lessons yet.",
+      };
+    }
+    return null;
+  })();
 
   const clearQuiz = async () => {
     if (!localTopic) return;
@@ -73,233 +129,99 @@ export function TopicDetail({ slug }: { slug: string }) {
     }
   };
 
+  const lessonNav =
+    learningLessons.length > 0 && safeActiveLessonIndex !== null ? (
+      <LessonNav
+        lessons={learningLessons}
+        activeIndex={safeActiveLessonIndex}
+        completedIds={completedLessonIds}
+        onSelect={selectLesson}
+      />
+    ) : null;
+
   return (
-    <motion.div
-      key={slug}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="min-h-screen bg-[#fbfaff]"
-    >
+    <div className="min-h-screen bg-[#fbfaff]">
       <AppHeader />
-      <section className="border-b border-violet-100 bg-white px-5 py-4">
-        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
-          <div className="min-w-0">
-            <Link to="/livemap" className="text-xs font-medium text-primary">
-              ← Back to Knowledge Hub
-            </Link>
-            <h1 className="mt-1 truncate text-2xl font-bold tracking-tight text-foreground">{topic.title}</h1>
-            <div className="mt-2">
-              <TopicMeta topic={topic} />
+      <div className="mx-auto flex max-w-[1680px] flex-col lg:min-h-[calc(100vh-60px)] lg:flex-row">
+        <aside className="hidden w-64 shrink-0 border-r border-violet-100 bg-white/70 lg:block">
+          <div className="sticky top-[60px] max-h-[calc(100vh-60px)] overflow-y-auto p-4">{lessonNav}</div>
+        </aside>
+
+        <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+          {learningLessons.length > 0 && (
+            <div className="mb-4 space-y-2 lg:hidden">
+              <Collapsible open={mobileLessonsOpen} onOpenChange={setMobileLessonsOpen}>
+                <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-violet-100 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+                  Lessons
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 rounded-xl border border-violet-100 bg-white p-3">
+                  {lessonNav}
+                </CollapsibleContent>
+              </Collapsible>
+              <Collapsible open={mobileContextOpen} onOpenChange={setMobileContextOpen}>
+                <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-violet-100 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
+                  Course info
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 rounded-xl border border-violet-100 bg-white p-3">
+                  <CourseContextSidebar topic={topic} lessonCount={learningLessons.length} totalMinutes={totalMinutes} />
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-            {localTopic && (
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="font-medium text-slate-500">Knowledge path:</span>
-                <Link
-                  to="/livemap"
-                  className="font-medium hover:text-primary"
-                  onClick={() =>
-                    setSelectedObject({
-                      type: "track",
-                      id: localTopic.track.slug,
-                      title: localTopic.track.title,
-                      subtitle: "Track",
-                      meta: {
-                        coursePath: `/topics/${localTopic.slug}`,
-                        focusFromBreadcrumb: true,
-                        trackSlug: localTopic.track.slug,
-                      },
-                    })
-                  }
-                >
-                  {localTopic.track.title}
-                </Link>
-                <span>→</span>
-                <Link
-                  to="/livemap"
-                  className="font-medium hover:text-primary"
-                  onClick={() =>
-                    setSelectedObject({
-                      type: "subject",
-                      id: localTopic.subject.slug,
-                      title: localTopic.subject.title,
-                      subtitle: localTopic.track.title,
-                      meta: {
-                        coursePath: `/topics/${localTopic.slug}`,
-                        focusFromBreadcrumb: true,
-                        trackSlug: localTopic.track.slug,
-                        subjectSlug: localTopic.subject.slug,
-                      },
-                    })
-                  }
-                >
-                  {localTopic.subject.title}
-                </Link>
-                <span>→</span>
-                <Link
-                  to="/livemap"
-                  className="font-medium hover:text-primary"
-                  onClick={() =>
-                    setSelectedObject({
-                      type: "module",
-                      id: localTopic.module.slug,
-                      title: localTopic.module.title,
-                      subtitle: `${localTopic.track.title} / ${localTopic.subject.title}`,
-                      meta: {
-                        coursePath: `/topics/${localTopic.slug}`,
-                        focusFromBreadcrumb: true,
-                        trackSlug: localTopic.track.slug,
-                        subjectSlug: localTopic.subject.slug,
-                        moduleSlug: localTopic.module.slug,
-                      },
-                    })
-                  }
-                >
-                  {localTopic.module.title}
-                </Link>
-                <span>→</span>
-                <Link
-                  to="/livemap"
-                  className="font-semibold text-foreground hover:text-primary"
-                  onClick={() =>
-                    setSelectedObject({
-                      type: "topic",
-                      id: localTopic.id,
-                      title: localTopic.title,
-                      subtitle: `${localTopic.track.title} / ${localTopic.subject.title} / ${localTopic.module.title}`,
-                      topic: localTopic,
-                      meta: {
-                        coursePath: `/topics/${localTopic.slug}`,
-                        focusFromBreadcrumb: true,
-                        trackSlug: localTopic.track.slug,
-                        subjectSlug: localTopic.subject.slug,
-                        moduleSlug: localTopic.module.slug,
-                        topicSlug: localTopic.slug,
-                        learningTime: "45 min",
-                        importance: localTopic.priority,
-                      },
-                    })
-                  }
-                >
-                  {localTopic.title}
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
+          )}
 
-      <main className="mx-auto flex max-w-[1440px] gap-5 p-5">
-        {learningLessons.length > 0 && safeActiveLessonIndex !== null && (
-          <LessonNav lessons={learningLessons} activeIndex={safeActiveLessonIndex} onSelect={setActiveLessonIndex} />
-        )}
+          {diagnosticActive && (
+            <Card className={`mb-4 border-primary/20 ${shouldOpenQuiz ? "bg-primary/10 ring-2 ring-primary/20" : "bg-primary/5"}`}>
+              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Before You Start</p>
+                  <h2 className="mt-1 text-base font-semibold text-foreground">Quick knowledge check · 3 min</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    This diagnostic helps SyncRadar understand what you already know before recommending depth and next steps.
+                  </p>
+                </div>
+                <Button size="sm" onClick={clearQuiz} disabled={isQuizCleared || saveQuizResult.isPending}>
+                  {isQuizCleared ? "Diagnostic complete" : saveQuizResult.isPending ? "Saving..." : "Take Diagnostic"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
-        <section className="min-w-0 flex-1">
-          {learningLessons.length === 0 || !activeLesson || safeActiveLessonIndex === null ? (
+          {courseActive && courseLoading ? (
+            <EmptyState icon="⏳" title="Loading course..." description="Fetching published lessons for this topic." />
+          ) : courseUnavailableState || !activeLesson || safeActiveLessonIndex === null ? (
             <EmptyState
               icon="📝"
-              title="Lessons coming soon"
-              description="This topic's lessons are being prepared. Check back later!"
+              title={courseUnavailableState?.title ?? "Lesson unavailable"}
+              description={courseUnavailableState?.description ?? "This lesson is not available."}
             />
           ) : (
             <>
-              <div className="mb-4 rounded-2xl border border-violet-100 bg-white p-3 lg:hidden">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">
-                    Lesson {safeActiveLessonIndex + 1} of {learningLessons.length}
-                  </span>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" disabled={!hasPrev} onClick={() => setActiveLessonIndex((i) => i - 1)}>
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" disabled={!hasNext} onClick={() => setActiveLessonIndex((i) => i + 1)}>
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {diagnosticLesson && (
-                <Card className={`mb-4 border-primary/20 ${shouldOpenQuiz ? "bg-primary/10 ring-2 ring-primary/20" : "bg-primary/5"}`}>
-                  <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Before You Start</p>
-                      <h2 className="mt-1 text-base font-semibold text-foreground">Quick knowledge check · {diagnosticLesson.duration ?? 3} min</h2>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        This diagnostic helps SyncRadar understand what you already know before recommending depth and next steps.
-                      </p>
-                    </div>
-                    <Button size="sm" onClick={clearQuiz} disabled={isQuizCleared || saveQuizResult.isPending}>
-                      {isQuizCleared ? "Diagnostic complete" : saveQuizResult.isPending ? "Saving..." : "Take Diagnostic"}
-                    </Button>
-                  </CardContent>
-                </Card>
+              {quizMessage && (
+                <p className="mb-4 text-xs text-muted-foreground">
+                  {quizMessage}
+                  {quizMessage.includes("signed in") && (
+                    <>
+                      {" "}
+                      <Link className="text-primary underline" to={`/login?redirect=/topic/${localTopic?.slug ?? slug}`}>
+                        Sign in here.
+                      </Link>
+                    </>
+                  )}
+                </p>
               )}
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeLesson._id}
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Card className="min-h-[calc(100vh-180px)] border-violet-100 bg-white shadow-[0_10px_35px_-25px_rgba(87,63,191,0.45)]">
-                    <CardContent className="p-8">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                        Lesson {safeActiveLessonIndex + 1} of {learningLessons.length}
-                      </p>
-                      <h2 className="mt-2 text-2xl font-bold text-foreground">{activeLesson.title}</h2>
-
-                      {quizMessage && (
-                        <p className="mt-4 text-xs text-muted-foreground">
-                          {quizMessage}
-                          {quizMessage.includes("signed in") && (
-                            <>
-                              {" "}
-                              <Link className="text-primary underline" to={`/login?redirect=/topic/${localTopic?.slug ?? slug}`}>
-                                Sign in here.
-                              </Link>
-                            </>
-                          )}
-                        </p>
-                      )}
-
-                      <div className="mt-6 max-w-3xl space-y-4 text-sm leading-relaxed text-muted-foreground">
-                        {activeLesson.content?.map((block: any, j: number) => {
-                          if (block._type === "block") {
-                            return <p key={j}>{block.children?.map((child: any) => child.text).join("")}</p>;
-                          }
-                          if (block._type === "code") {
-                            return (
-                              <pre key={j} className="overflow-x-auto rounded-lg border bg-muted p-4 font-mono text-xs">
-                                <code>{block.code}</code>
-                              </pre>
-                            );
-                          }
-                          return null;
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="mt-4 flex items-center justify-between">
-                <Button variant="outline" size="sm" disabled={!hasPrev} onClick={() => setActiveLessonIndex((i) => i - 1)}>
-                  <ChevronLeft className="mr-1 h-4 w-4" /> Previous
-                </Button>
-                <span className="hidden text-xs text-muted-foreground sm:block">
-                  {safeActiveLessonIndex + 1} / {learningLessons.length}
-                </span>
-                <Button variant="outline" size="sm" disabled={!hasNext} onClick={() => setActiveLessonIndex((i) => i + 1)}>
-                  Next <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </div>
+              <LessonCanvas lessons={learningLessons} activeIndex={safeActiveLessonIndex} onSelect={selectLesson} />
             </>
           )}
-        </section>
-      </main>
-    </motion.div>
+        </main>
+
+        <aside className="hidden w-60 shrink-0 border-l border-violet-100 bg-white/70 lg:block">
+          <div className="sticky top-[60px] max-h-[calc(100vh-60px)] overflow-y-auto p-4">
+            <CourseContextSidebar topic={topic} lessonCount={learningLessons.length} totalMinutes={totalMinutes} />
+          </div>
+        </aside>
+      </div>
+    </div>
   );
 }

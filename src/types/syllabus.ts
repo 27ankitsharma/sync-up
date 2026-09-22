@@ -1,10 +1,30 @@
 export type Difficulty = "Beginner" | "Intermediate" | "Advanced";
 
+export type KnowledgeLayer =
+  | "Foundations"
+  | "Models & Architectures"
+  | "Techniques & Practices"
+  | "Systems & Applications"
+  | "Frontiers & Emerging";
+
+export const KNOWLEDGE_LAYERS: readonly KnowledgeLayer[] = [
+  "Foundations",
+  "Models & Architectures",
+  "Techniques & Practices",
+  "Systems & Applications",
+  "Frontiers & Emerging",
+] as const;
+
 export type TopicStatus = "draft" | "published" | "archived" | "coming_soon";
 
 export type Priority = "high" | "medium" | "low";
 export type ContentStatus = "Draft" | "Published" | "Archived";
 export type LensRelevanceCategory = "Must" | "Good" | "Optional";
+
+/** Editorial availability for course and diagnostic experiences. */
+export type AvailabilityStatus = "yes" | "no" | "WIP";
+
+export const AVAILABILITY_STATUSES: readonly AvailabilityStatus[] = ["yes", "no", "WIP"] as const;
 
 export interface ResourceLink {
   type: string;
@@ -56,6 +76,8 @@ export interface Topic {
   resources?: ResourceLink[];
   order: number;
   hasCourse: boolean;
+  course_status?: AvailabilityStatus;
+  diagnostic_status?: AvailabilityStatus;
 }
 
 export interface Module extends KnowledgeNodeMetadata {

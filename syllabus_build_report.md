@@ -4,7 +4,7 @@
 - Tracks: 19
 - Subjects: 128
 - Modules: 513
-- Topics: 2565
+- Topics: 2566
 
 ## Records Migrated
 - No legacy migration was required.

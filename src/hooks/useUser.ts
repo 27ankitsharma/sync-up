@@ -72,6 +72,27 @@ export function useTopicCompletion(topicSlug: string) {
   });
 }
 
+export function useCompletedLessonIds(topicId?: string | null) {
+  return useQuery({
+    queryKey: ["completed-lesson-ids", topicId ?? null],
+    queryFn: () => UserService.getCompletedLessonIds(topicId ?? ""),
+    enabled: Boolean(topicId),
+    staleTime: FIVE_MINUTES,
+  });
+}
+
+export function useMarkLessonCompleted() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ lessonId, topicId }: { lessonId: string; topicId: string }) =>
+      UserService.markLessonCompleted(lessonId, topicId),
+    onSuccess: (_value, input) => {
+      queryClient.invalidateQueries({ queryKey: ["completed-lesson-ids", input.topicId] });
+    },
+  });
+}
+
 export function useSaveQuizResult() {
   const queryClient = useQueryClient();
 

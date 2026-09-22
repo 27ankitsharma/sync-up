@@ -123,3 +123,6 @@ create policy "Newsletter preferences are updatable by owner"
   on public.subscription for update
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Course content and additive lesson progress are defined in
+-- supabase/migrations/20260913120000_courses_and_lessons.sql

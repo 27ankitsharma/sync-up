@@ -17,7 +17,7 @@ export function localTopicToLegacyTopic(topic: TopicWithContext): LegacyTopic {
     order: topic.order,
     priority: topic.priority,
     whyItMatters: portableParagraphs([topic.why_it_matters]),
-    lessons: buildDummyLessons(topic),
+    lessons: [],
     module: {
       _id: topic.module.slug,
       title: topic.module.title,
@@ -65,61 +65,6 @@ function isoWeekToApproxDate(isoWeek: string): string {
   const week = Number(weekPart);
   const date = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
   return date.toISOString();
-}
-
-function buildDummyLessons(topic: TopicWithContext): LegacyTopic["lessons"] {
-  return [
-    {
-      _id: `${topic.id}-quiz`,
-      title: "Readiness Quiz",
-      order: 1,
-      duration: 5,
-      content: portableParagraphs([
-        `Quiz checkpoint for ${topic.title}.`,
-        "This is a placeholder quiz lesson. Replace it with reviewed quiz questions in the canonical content source when the final course content is authored.",
-      ]),
-    },
-    {
-      _id: `${topic.id}-intro`,
-      title: `Introduction to ${topic.title}`,
-      order: 2,
-      duration: 10,
-      content: portableParagraphs([
-        topic.summary || `Understand what ${topic.title} is and where it fits in the learning path.`,
-        topic.why_it_matters || `${topic.title} helps connect the hierarchy to practical AI literacy outcomes.`,
-      ]),
-    },
-    {
-      _id: `${topic.id}-core-concepts`,
-      title: "Core Concepts",
-      order: 3,
-      duration: 15,
-      content: portableParagraphs([
-        `Learn the key ideas, vocabulary, and mental models behind ${topic.title}.`,
-        `Layer: ${topic.layer}. Difficulty: ${topic.difficulty}.`,
-      ]),
-    },
-    {
-      _id: `${topic.id}-practice`,
-      title: "Practice and Application",
-      order: 4,
-      duration: 20,
-      content: portableParagraphs([
-        `Apply ${topic.title} through a small hands-on exercise or scenario.`,
-        "This placeholder lesson is meant to be replaced by quality-reviewed course content.",
-      ]),
-    },
-    {
-      _id: `${topic.id}-next-steps`,
-      title: "Best Practices and Next Steps",
-      order: 5,
-      duration: 10,
-      content: portableParagraphs([
-        `Review common mistakes, best practices, and what to learn after ${topic.title}.`,
-        `Relevant roles: ${topic.roles.join(", ") || "General learner"}.`,
-      ]),
-    },
-  ];
 }
 
 function portableParagraphs(paragraphs: string[]) {

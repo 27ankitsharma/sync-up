@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { TopicWithContext } from "@/types/syllabus";
 
-export type KnowledgeObjectType = "track" | "subject" | "module" | "topic" | "radar" | "gap";
+export type KnowledgeObjectType = "track" | "subject" | "module" | "topic" | "radar" | "gap" | "discovery";
 
 export interface KnowledgeObject {
   type: KnowledgeObjectType;

@@ -1,4 +1,12 @@
-import type { Difficulty, DifficultyAggregate, Syllabus, Topic, TopicWithContext } from "@/types/syllabus";
+import {
+  KNOWLEDGE_LAYERS,
+  type Difficulty,
+  type DifficultyAggregate,
+  type KnowledgeLayer,
+  type Syllabus,
+  type Topic,
+  type TopicWithContext,
+} from "@/types/syllabus";
 
 export type RelevanceCategory = "Must" | "Good" | "Optional";
 
@@ -127,6 +135,16 @@ export function flattenSyllabusTopics(syllabus: Syllabus): Topic[] {
   );
 }
 
+export function isValidKnowledgeLayer(value: string | null | undefined): value is KnowledgeLayer {
+  return Boolean(value && (KNOWLEDGE_LAYERS as readonly string[]).includes(value));
+}
+
+/** Topic-level Knowledge Layer from syllabus.json. Does not infer or overwrite. */
+export function topicKnowledgeLayer(topic?: Topic | null): KnowledgeLayer | null {
+  const value = topic?.knowledge_layer || topic?.layer;
+  return isValidKnowledgeLayer(value) ? value : null;
+}
+
 export function topicRelevance(topic: Topic, lens: string): RelevanceCategory {
   const direct = topic.lens_relevance?.[lens];
   if (direct) return direct;
@@ -172,6 +190,29 @@ export function summarizeBranchRelevance(topics: Topic[], lens: string): Relevan
   if (counts.Must >= counts.Good && counts.Must >= counts.Optional) return "Must";
   if (counts.Good >= counts.Optional) return "Good";
   return "Optional";
+}
+
+/** One bubble per immediate child, sorted Must → Good → Optional for scannability. */
+export function sortRelevanceBubbles(categories: RelevanceCategory[]): RelevanceCategory[] {
+  const order: Record<RelevanceCategory, number> = { Must: 0, Good: 1, Optional: 2 };
+  return [...categories].sort((left, right) => order[left] - order[right]);
+}
+
+export function relevanceBubbleTitle(categories: RelevanceCategory[]) {
+  const counts = categories.reduce(
+    (acc, category) => {
+      acc[category] += 1;
+      return acc;
+    },
+    { Must: 0, Good: 0, Optional: 0 } as Record<RelevanceCategory, number>,
+  );
+  return [
+    counts.Must > 0 ? `${counts.Must} Must Learn` : null,
+    counts.Good > 0 ? `${counts.Good} Good to Have` : null,
+    counts.Optional > 0 ? `${counts.Optional} Optional` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function relevancePercent(topics: Topic[], lens: string) {
