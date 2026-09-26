@@ -132,6 +132,7 @@ TOPIC_COLUMNS = [
     "Is_Radar",
     "Radar_Start_Date",
     "Radar_End_Date",
+    "Radar_Classification",
 ]
 
 VALID_DIFFICULTIES = {"Beginner", "Intermediate", "Advanced"}
@@ -139,6 +140,13 @@ VALID_CONTENT_STATUSES = {"Draft", "Published", "Archived"}
 VALID_AVAILABILITY_STATUSES = {"yes", "no", "WIP"}
 AVAILABILITY_ALIASES = {"yes": "yes", "no": "no", "wip": "WIP"}
 VALID_RELEVANCE = {"Must", "Good", "Optional"}
+RADAR_CLASSIFICATION_ALIASES = {
+    "new topic": "new_topic_candidate",
+    "new_topic_candidate": "new_topic_candidate",
+    "topic update": "existing_topic_update",
+    "existing_topic_update": "existing_topic_update",
+    "fyi": "fyi",
+}
 VALID_KNOWLEDGE_LAYERS = {
     "Foundations",
     "Models & Architectures",
@@ -483,11 +491,23 @@ def parse_availability_status(value: str, column: str, label: str, log: BuildIss
     return mapped
 
 
-def ensure_topic_availability_columns(path: Path) -> None:
-    """Add Course_Status and Diagnostic_Status to Topics if the workbook predates them.
+def parse_radar_classification(value: str, is_radar: bool, label: str, log: BuildIssueLog) -> str | None:
+    normalized = value.strip().lower()
+    if not normalized:
+        if is_radar:
+            log.error(f"{label}: Radar_Classification is required when Is_Radar is TRUE")
+        return None
+    classification = RADAR_CLASSIFICATION_ALIASES.get(normalized)
+    if classification is None:
+        log.error(f"{label}: Radar_Classification must be New Topic, Topic Update, or FYI")
+    return classification
 
-    Existing topic rows are initialized to yes so current learning experiences stay reachable.
-    Blank values in later authoring default to no.
+
+def ensure_topic_authoring_columns(path: Path) -> None:
+    """Add newer topic authoring columns when the workbook predates them.
+
+    Existing availability rows are initialized to yes so current learning experiences stay reachable.
+    Existing Radar rows default to Topic Update; later Radar authoring must classify new entries explicitly.
     """
     wb = load_workbook(path)
     if "Topics" not in wb.sheetnames:
@@ -505,6 +525,20 @@ def ensure_topic_availability_columns(path: Path) -> None:
         for row_index in range(2, ws.max_row + 1):
             if any(cell_value(ws.cell(row_index, col_index).value) for col_index in range(1, ws.max_column + 1)):
                 ws.cell(row_index, insert_at).value = "yes"
+        changed = True
+
+    headers = [cell.value for cell in ws[1]]
+    if "Radar_Classification" not in headers:
+        after = "Radar_End_Date"
+        insert_at = headers.index(after) + 2 if after in headers else len(headers) + 1
+        ws.insert_cols(insert_at)
+        ws.cell(1, insert_at).value = "Radar_Classification"
+        headers = [cell.value for cell in ws[1]]
+        radar_column = headers.index("Is_Radar") + 1
+        for row_index in range(2, ws.max_row + 1):
+            is_radar = cell_value(ws.cell(row_index, radar_column).value).strip().lower()
+            if is_radar in {"true", "1", "yes", "y"}:
+                ws.cell(row_index, insert_at).value = "Topic Update"
         changed = True
 
     if changed:
@@ -777,6 +811,12 @@ def build_syllabus(
         radar_end = parse_date(row.get("Radar_End_Date", ""), label, "Radar_End_Date", log)
         validate_radar_dates(radar_start, radar_end, label, log)
         is_radar = parse_bool(row.get("Is_Radar", ""), label, log)
+        radar_classification = parse_radar_classification(
+            row.get("Radar_Classification", ""),
+            is_radar,
+            label,
+            log,
+        )
 
         if is_radar and not radar_start:
             log.warn(f"{label}: Is_Radar is TRUE but Radar_Start_Date is blank")
@@ -819,6 +859,7 @@ def build_syllabus(
             "radar_week": date_to_iso_week(radar_start),
             "radar_start_date": radar_start,
             "radar_end_date": radar_end,
+            "radar_classification": radar_classification,
             "summary": row.get("Summary", "").strip(),
             "why_it_matters": row.get("Why_It_Matters", "").strip(),
             "resources": parse_resources(row.get("Resources", ""), label, log),
@@ -1043,7 +1084,7 @@ def main() -> int:
         if not has_target_workbook(INPUT_FILE):
             migrate_legacy_workbook(INPUT_FILE, log)
 
-        ensure_topic_availability_columns(INPUT_FILE)
+        ensure_topic_authoring_columns(INPUT_FILE)
 
         track_rows = load_workbook_rows(INPUT_FILE, "Tracks", TRACK_COLUMNS)
         subject_rows = load_workbook_rows(INPUT_FILE, "Subjects", SUBJECT_COLUMNS)

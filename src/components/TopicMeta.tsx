@@ -17,7 +17,7 @@ export function TopicMeta({
     topic.difficulty ? capitalize(topic.difficulty) : null,
     resolvedMinutes > 0 ? `${resolvedMinutes} min` : null,
     `${resolvedLessonCount} ${resolvedLessonCount === 1 ? "lesson" : "lessons"}`,
-    topic.priority ? `${capitalize(topic.priority)} Priority` : null,
+    topic.priority ? capitalize(topic.priority) : null,
     topic.layer || null,
   ].filter(Boolean);
 

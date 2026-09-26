@@ -18,7 +18,7 @@ const topic = {
 describe("TopicMeta", () => {
   it("renders a compact metadata row", () => {
     render(<TopicMeta topic={topic} lessonCount={5} totalMinutes={53} />);
-    expect(screen.getByText("Beginner · 53 min · 5 lessons · High Priority · Models & Architectures")).toBeInTheDocument();
+    expect(screen.getByText("Beginner · 53 min · 5 lessons · High · Models & Architectures")).toBeInTheDocument();
   });
 
   it("shows the first three roles and expands the rest", () => {

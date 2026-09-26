@@ -133,8 +133,22 @@ Each sheet supports:
 - `Is_Radar`
 - `Radar_Start_Date`
 - `Radar_End_Date`
+- `Radar_Classification` on the Topics sheet
 
-These control current Radar presentation state only. Radar discovery/agent data remains outside `syllabus.xlsx`.
+These fields make syllabus topics available to the Radar feed. Radar does not require
+a separate content manifest.
+
+## Radar Feed Authoring
+
+Set `Is_Radar` to `TRUE`, provide a `Radar_Start_Date`, and choose:
+
+- `New Topic` when the topic has newly entered the knowledge map.
+- `Topic Update` when new information changes an existing topic.
+- `FYI` for useful awareness that does not change the knowledge map.
+
+The feed derives its title, hierarchy path, summary, rationale, priority,
+knowledge layer, lens relevance, and sources from the existing topic columns.
+`Radar_Start_Date` is the discovery timestamp used by the Radar time-range filter.
 
 ## Archiving
 

@@ -33,7 +33,7 @@ export function useSignOut() {
       queryClient.invalidateQueries({ queryKey: ["current-user"] });
       queryClient.invalidateQueries({ queryKey: ["user-profile"] });
       queryClient.invalidateQueries({ queryKey: ["completed-topic-slugs"] });
-      queryClient.invalidateQueries({ queryKey: ["sync-score"] });
+      queryClient.invalidateQueries({ queryKey: ["sync-metrics"] });
     },
   });
 }

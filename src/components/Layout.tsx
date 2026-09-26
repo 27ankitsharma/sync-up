@@ -2,14 +2,13 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthNav } from "@/components/AuthNav";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
 import { MyContextSidebar } from "@/components/knowledge/MyContextSidebar";
 import { useLens } from "@/contexts/LensContext";
 import { useAuthUser } from "@/hooks/useAuth";
-import { useSyncScoreOverview, useProgress } from "@/hooks/useUser";
+import { useSyncMetrics } from "@/hooks/useUser";
 import { Bell, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -114,12 +113,9 @@ function PublicHeader() {
 function AuthenticatedHeader() {
   const { pathname } = useLocation();
   const { selectedLens } = useLens();
-  const { data: syncScore } = useSyncScoreOverview(selectedLens);
-  const { data: progress = [] } = useProgress();
-  const syncBadgeLabel =
-    !syncScore || syncScore.importantTopics === 0 || progress.length === 0
-      ? "Not assessed"
-      : `${syncScore.syncScore}%`;
+  const { data: syncMetrics, isError: syncMetricsError } = useSyncMetrics(selectedLens);
+  const knowledgeLabel = metricLabel(syncMetrics?.knowledgeSync.percent, syncMetricsError);
+  const radarLabel = metricLabel(syncMetrics?.radarSync.percent, syncMetricsError);
 
   return (
     <header className="sticky top-0 z-50 border-b border-violet-100/70 bg-white/85 backdrop-blur-xl">
@@ -160,9 +156,25 @@ function AuthenticatedHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge className="hidden lg:inline-flex rounded-xl bg-emerald-50 px-3 py-1.5 text-emerald-700 hover:bg-emerald-50">
-            Sync {syncBadgeLabel}
-          </Badge>
+          <div className="hidden items-center overflow-hidden rounded-xl border border-violet-100 bg-white text-[11px] shadow-sm lg:flex">
+            <Link
+              to="/livemap"
+              className="flex items-center gap-1.5 bg-indigo-50 px-2.5 py-1.5 font-bold text-indigo-700 transition-colors hover:bg-indigo-100"
+              title="Knowledge Sync for the selected role"
+            >
+              <span>Knowledge Sync</span>
+              <span>{knowledgeLabel}</span>
+            </Link>
+            <span className="h-5 w-px bg-violet-100" aria-hidden="true" />
+            <Link
+              to="/radar"
+              className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1.5 font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+              title="Radar Sync for current Radar content"
+            >
+              <span>Radar Sync</span>
+              <span>{radarLabel}</span>
+            </Link>
+          </div>
           <button className="hidden lg:grid h-9 w-9 place-items-center rounded-xl border border-violet-100 bg-white text-muted-foreground hover:text-foreground">
             <Bell className="h-4 w-4" />
           </button>
@@ -171,4 +183,10 @@ function AuthenticatedHeader() {
       </div>
     </header>
   );
+}
+
+function metricLabel(percent: number | null | undefined, isError: boolean) {
+  if (isError || percent === null) return "Unavailable";
+  if (percent === undefined) return "—";
+  return `${percent}%`;
 }

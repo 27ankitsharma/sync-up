@@ -1,20 +1,14 @@
 import type { User } from "@supabase/supabase-js";
-import { ContentService } from "@/services/ContentService";
 import { getSupabaseClient, requireSupabaseClient } from "@/lib/supabase";
-import type { SyncScoreSnapshot } from "@/types/progress";
 import type {
   CompletedTopic,
   NewsletterSubscription,
   NewsletterSubscriptionInput,
   QuizAttempt,
-  QuizAttemptInput,
   SavedTopic,
-  SyncScoreOverview,
   UserProfile,
   UserProfileInput,
 } from "@/types/user";
-
-const WEEKS_IN_SYNC_WINDOW = 8;
 
 interface ProfileRow {
   id: string;
@@ -36,14 +30,13 @@ interface CompletedTopicRow {
 }
 
 interface QuizAttemptRow {
-  id: string;
+  attempt_id: string;
   user_id: string;
-  topic_id: string;
-  topic_slug: string;
-  score: number;
+  topic_id: string | null;
+  topic_slug: string | null;
+  score: number | null;
   passed: boolean;
-  answers: Record<string, unknown> | null;
-  attempted_at: string;
+  started_at: string;
 }
 
 interface SavedTopicRow {
@@ -72,8 +65,6 @@ export interface UserServiceContract {
   getProgress(): Promise<CompletedTopic[]>;
   getCompletedTopicSlugs(): Promise<string[]>;
   isTopicCompleted(topicSlug: string): Promise<boolean>;
-  markTopicCompleted(topicId: string, topicSlug: string, layer?: string | null): Promise<CompletedTopic>;
-  saveQuizResult(input: QuizAttemptInput): Promise<QuizAttempt>;
   getQuizAttempts(): Promise<QuizAttempt[]>;
   getCompletedLessonIds(topicId: string): Promise<string[]>;
   markLessonCompleted(lessonId: string, topicId: string): Promise<void>;
@@ -82,8 +73,6 @@ export interface UserServiceContract {
   removeSavedTopic(topicSlug: string): Promise<void>;
   getSubscription(): Promise<NewsletterSubscription | null>;
   saveSubscription(input: NewsletterSubscriptionInput): Promise<NewsletterSubscription>;
-  getSyncScore(selectedLens?: string | null): Promise<SyncScoreOverview>;
-  getSyncScoreHistory(layer: string, weeksBack?: number): Promise<SyncScoreSnapshot[]>;
 }
 
 class SupabaseUserService implements UserServiceContract {
@@ -166,60 +155,16 @@ class SupabaseUserService implements UserServiceContract {
     return Boolean(data);
   }
 
-  async markTopicCompleted(topicId: string, topicSlug: string, layer?: string | null): Promise<CompletedTopic> {
-    const user = await requireUser();
-    const { data, error } = await requireSupabaseClient()
-      .from("completed_topic")
-      .upsert(
-        {
-          user_id: user.id,
-          topic_id: topicId,
-          topic_slug: topicSlug,
-          layer: layer ?? null,
-          completed_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,topic_slug" },
-      )
-      .select("*")
-      .single();
-
-    if (error) throw error;
-    return mapCompletedTopic(data as CompletedTopicRow);
-  }
-
-  async saveQuizResult(input: QuizAttemptInput): Promise<QuizAttempt> {
-    const user = await requireUser();
-    const { data, error } = await requireSupabaseClient()
-      .from("quiz_attempt")
-      .insert({
-        user_id: user.id,
-        topic_id: input.topicId,
-        topic_slug: input.topicSlug,
-        score: input.score,
-        passed: input.passed,
-        answers: input.answers ?? null,
-      })
-      .select("*")
-      .single();
-
-    if (error) throw error;
-
-    if (input.passed) {
-      await this.markTopicCompleted(input.topicId, input.topicSlug, input.layer ?? null);
-    }
-
-    return mapQuizAttempt(data as QuizAttemptRow);
-  }
-
   async getQuizAttempts(): Promise<QuizAttempt[]> {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
     const { data, error } = await requireSupabaseClient()
-      .from("quiz_attempt")
+      .from("quiz_attempts")
       .select("*")
       .eq("user_id", user.id)
-      .order("attempted_at", { ascending: false });
+      .eq("status", "completed")
+      .order("started_at", { ascending: false });
 
     if (error) throw error;
     return ((data ?? []) as QuizAttemptRow[]).map(mapQuizAttempt);
@@ -338,71 +283,6 @@ class SupabaseUserService implements UserServiceContract {
     return mapSubscription(data as SubscriptionRow);
   }
 
-  async getSyncScore(selectedLens: string | null = null): Promise<SyncScoreOverview> {
-    const topics = await ContentService.getAllTopics();
-    const attempts = await this.getQuizAttempts();
-    const completedSlugs = new Set(await this.getCompletedTopicSlugs());
-    const windowStart = addDays(new Date(), -90);
-    const recentRadarTopics = topics.filter((topic) => {
-      if (!topic.is_radar || !topic.radar_week) return false;
-      return isoWeekToDate(topic.radar_week) >= windowStart;
-    });
-
-    // Role-scoped sync score: only consider radar topics that have lens relevance for the selected role.
-    // This keeps the denominator aligned with what the user is currently learning for.
-    const relevantTopics = selectedLens
-      ? recentRadarTopics.filter((topic) => Boolean(topic.lens_relevance?.[selectedLens]))
-      : recentRadarTopics;
-
-    const relevantSlugSet = new Set(relevantTopics.map((topic) => topic.slug));
-    const completedTopics = [...completedSlugs].filter((slug) => relevantSlugSet.has(slug)).length;
-    const relevantAttempts = attempts.filter((attempt) => relevantSlugSet.has(attempt.topicSlug));
-    const quizAccuracy =
-      relevantAttempts.length === 0
-        ? 0
-        : Math.round(
-            relevantAttempts.reduce((sum, attempt) => sum + attempt.score, 0) / relevantAttempts.length,
-          );
-
-    return {
-      importantTopics: relevantTopics.length,
-      completedTopics,
-      quizAccuracy,
-      syncScore: relevantTopics.length === 0 ? 0 : Math.round((completedTopics / relevantTopics.length) * 100),
-    };
-  }
-
-  async getSyncScoreHistory(layer: string, weeksBack = WEEKS_IN_SYNC_WINDOW): Promise<SyncScoreSnapshot[]> {
-    const weeks = getRecentIsoWeeks(Math.max(1, weeksBack));
-    return Promise.all(weeks.map((isoWeek) => this.computeSyncScoreForLayer(layer, isoWeek)));
-  }
-
-  private async computeSyncScoreForLayer(layer: string, isoWeek: string): Promise<SyncScoreSnapshot> {
-    const weekStart = isoWeekToDate(isoWeek);
-    const weekEnd = addDays(weekStart, 7);
-    const windowStart = addDays(weekStart, -(WEEKS_IN_SYNC_WINDOW - 1) * 7);
-    const topics = await ContentService.getAllTopics();
-    const completedSlugs = new Set(await this.getCompletedTopicSlugs());
-    const windowTopics = topics.filter((topic) => {
-      if (!topic.is_radar || topic.layer !== layer || !topic.radar_week) return false;
-      const topicWeekStart = isoWeekToDate(topic.radar_week);
-      return topicWeekStart >= windowStart && topicWeekStart <= weekStart;
-    });
-    const completed = windowTopics.filter((topic) => {
-      if (!completedSlugs.has(topic.slug)) return false;
-      return true;
-    }).length;
-    const total = windowTopics.length;
-
-    return {
-      layer,
-      isoWeek,
-      completed,
-      total,
-      score: total === 0 ? 0 : Math.round((completed / total) * 100),
-      computedAt: weekEnd < new Date() ? weekEnd.toISOString() : new Date().toISOString(),
-    };
-  }
 }
 
 async function requireUser(): Promise<User> {
@@ -439,14 +319,14 @@ function mapCompletedTopic(row: CompletedTopicRow): CompletedTopic {
 
 function mapQuizAttempt(row: QuizAttemptRow): QuizAttempt {
   return {
-    id: row.id,
+    id: row.attempt_id,
     userId: row.user_id,
-    topicId: row.topic_id,
-    topicSlug: row.topic_slug,
-    score: row.score,
+    topicId: row.topic_id ?? "",
+    topicSlug: row.topic_slug ?? "",
+    score: row.score ?? 0,
     passed: row.passed,
-    answers: row.answers ?? null,
-    attemptedAt: row.attempted_at,
+    answers: null,
+    attemptedAt: row.started_at,
   };
 }
 
@@ -471,47 +351,6 @@ function mapSubscription(row: SubscriptionRow): NewsletterSubscription {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
-}
-
-function getRecentIsoWeeks(weeksBack: number): string[] {
-  const currentWeekStart = isoWeekToDate(dateToIsoWeek(new Date()));
-  return Array.from({ length: weeksBack }, (_, index) => {
-    const offset = index - (weeksBack - 1);
-    return dateToIsoWeek(addDays(currentWeekStart, offset * 7));
-  });
-}
-
-function dateToIsoWeek(date: Date): string {
-  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const day = utcDate.getUTCDay() || 7;
-  utcDate.setUTCDate(utcDate.getUTCDate() + 4 - day);
-
-  const yearStart = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((utcDate.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-
-  return `${utcDate.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
-}
-
-function isoWeekToDate(isoWeek: string): Date {
-  const [yearPart, weekPart] = isoWeek.split("-W");
-  const year = Number(yearPart);
-  const week = Number(weekPart);
-  const simple = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
-  const day = simple.getUTCDay() || 7;
-
-  if (day <= 4) {
-    simple.setUTCDate(simple.getUTCDate() - day + 1);
-  } else {
-    simple.setUTCDate(simple.getUTCDate() + 8 - day);
-  }
-
-  return simple;
-}
-
-function addDays(date: Date, days: number): Date {
-  const nextDate = new Date(date);
-  nextDate.setUTCDate(nextDate.getUTCDate() + days);
-  return nextDate;
 }
 
 export const UserService: UserServiceContract = new SupabaseUserService();

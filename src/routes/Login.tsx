@@ -49,7 +49,7 @@ export default function Login() {
         <CardHeader>
           <CardTitle>Sign in to SyncRadar</CardTitle>
           <CardDescription>
-            Browse freely. Sign in to save quiz progress, Sync Score, bookmarks, and preferences.
+            Browse freely. Sign in to save quiz progress, Knowledge Sync, Radar Sync, bookmarks, and preferences.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

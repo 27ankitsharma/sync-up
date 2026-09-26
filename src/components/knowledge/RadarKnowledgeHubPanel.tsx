@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { RadarOutcomeIcon } from "@/components/radar/RadarOutcomeIcon";
 import {
-  EditorialApplySections,
   EditorialInterviewSections,
   HubChip,
   HubEmptyNote,
@@ -14,7 +13,6 @@ import {
 } from "@/components/knowledge/KnowledgeHubPanel";
 import { useLens } from "@/contexts/LensContext";
 import { useAllTopics } from "@/hooks/useSyllabus";
-import { useCompletedTopicSlugs } from "@/hooks/useUser";
 import {
   coursePathForTopic,
   diagnosticPathForTopic,
@@ -28,7 +26,6 @@ import {
   formatDiscoveredAtLong,
   formatSyllabusBreadcrumb,
   sourceTypeBadge,
-  summarizeSources,
 } from "@/lib/radarDiscoveryUtils";
 import { relevanceBadgeClass, relevanceLabel, siblingTopics } from "@/lib/syllabusMetrics";
 import type { RadarDiscovery } from "@/types/radarDiscovery";
@@ -36,7 +33,7 @@ import { Flame } from "lucide-react";
 
 export function RadarKnowledgeHubEmpty() {
   return (
-    <KnowledgeHubEmpty description="Overview, Resources, Apply, Interview & FAQ, Updates, and Related appear here for the selected Radar discovery." />
+    <KnowledgeHubEmpty description="Overview, Resources, Interview & FAQ, Updates, and Related appear here for the selected Radar discovery." />
   );
 }
 
@@ -49,7 +46,6 @@ export function RadarKnowledgeHubPanel({
 }) {
   const { selectedLens } = useLens();
   const { data: allTopics = [] } = useAllTopics();
-  const { data: completedTopicSlugs = [] } = useCompletedTopicSlugs();
 
   const mappedTopic = useMemo(() => findMappedSyllabusTopic(discovery, allTopics), [allTopics, discovery]);
   const relatedTopics = useMemo(() => {
@@ -70,15 +66,7 @@ export function RadarKnowledgeHubPanel({
   const diagnosticStatus = mappedTopic ? topicDiagnosticStatus(mappedTopic) : "no";
   const coursePath = coursePathForTopic(mappedTopic);
   const quizPath = diagnosticPathForTopic(mappedTopic);
-  const isCompleted = Boolean(mappedTopic && completedTopicSlugs.includes(mappedTopic.slug));
   const lensCategory = discovery.lensRelevance[selectedLens];
-  const sourceSummary = summarizeSources(discovery.sources);
-  const prerequisites = mappedTopic
-    ? siblingTopics(mappedTopic, allTopics).filter((item) => item.order < mappedTopic.order)
-    : [];
-  const nextConcepts = mappedTopic
-    ? siblingTopics(mappedTopic, allTopics).filter((item) => item.order > mappedTopic.order)
-    : [];
   const roles = Object.keys(discovery.lensRelevance);
   const whatItIs = mappedTopic?.summary?.trim() || discovery.summary || discovery.title;
   const whyItMatters = mappedTopic?.why_it_matters?.trim() || discovery.reason;
@@ -99,7 +87,7 @@ export function RadarKnowledgeHubPanel({
           {discovery.priority === "high" && (
             <Badge variant="outline" className="rounded-md border-red-200 bg-red-50 text-[10px] font-bold text-red-700">
               <Flame className="mr-1 inline h-3 w-3" />
-              HIGH PRIORITY
+              HIGH
             </Badge>
           )}
           {lensCategory && (
@@ -128,52 +116,7 @@ export function RadarKnowledgeHubPanel({
             <HubSection title="Why it matters">
               <p>{whyItMatters}</p>
             </HubSection>
-            <HubSection title="Why Radar surfaced it">
-              <p>
-                {classificationShortLabel(discovery.classification)}
-                {discovery.priority === "high" ? " · high priority for your current lens" : ` · ${discovery.priority} priority`}
-                {lensCategory ? ` · ${selectedLens} ${relevanceLabel(lensCategory).toLowerCase()}` : ""}.
-              </p>
-            </HubSection>
-            <HubSection title="Emerging signals">
-              {discovery.sources.length > 0 ? (
-                <p>
-                  {discovery.sources.length} recent signal{discovery.sources.length === 1 ? "" : "s"}
-                  {sourceSummary.length > 0 ? ` · ${sourceSummary.join(", ")}` : ""}. See Updates for the development
-                  and Resources for the full source list.
-                </p>
-              ) : (
-                <HubEmptyNote>No emerging source signals are attached yet.</HubEmptyNote>
-              )}
-            </HubSection>
-            <HubSection title="Key concepts">
-              <HubEmptyNote>Key concepts will appear here when editorial content is published.</HubEmptyNote>
-            </HubSection>
-            <HubSection title="What you'll learn">
-              {mappedTopic ? (
-                <HubEmptyNote>Learning outcomes will appear here when the course outline is published.</HubEmptyNote>
-              ) : (
-                <HubEmptyNote>This discovery is not yet a LiveMap topic, so there is no course outline.</HubEmptyNote>
-              )}
-            </HubSection>
-            <HubSection title="Prerequisites">
-              {prerequisites.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {prerequisites.map((item) => (
-                    <HubChip key={item.id}>{item.title}</HubChip>
-                  ))}
-                </div>
-              ) : (
-                <HubEmptyNote>No prerequisites are listed for the related topic yet.</HubEmptyNote>
-              )}
-            </HubSection>
-            {mappedTopic && (
-              <HubSection title="Your progress">
-                <p className="text-[11px] text-muted-foreground">
-                  {isCompleted ? "You have completed the mapped LiveMap topic." : "You have not completed the mapped LiveMap topic yet."}
-                </p>
-              </HubSection>
-            )}
+            <HubSection title="Why Radar surfaced it">{null}</HubSection>
           </>
         ),
         Resources: (
@@ -204,7 +147,6 @@ export function RadarKnowledgeHubPanel({
             )}
           </HubSection>
         ),
-        Apply: <EditorialApplySections />,
         "Interview & FAQ": <EditorialInterviewSections />,
         Updates: (
           <>
@@ -249,17 +191,6 @@ export function RadarKnowledgeHubPanel({
                 </div>
               ) : (
                 <HubEmptyNote>No related LiveMap concepts linked yet.</HubEmptyNote>
-              )}
-            </HubSection>
-            <HubSection title="Next concepts">
-              {nextConcepts.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {nextConcepts.map((item) => (
-                    <HubChip key={item.id}>{item.title}</HubChip>
-                  ))}
-                </div>
-              ) : (
-                <HubEmptyNote>No next concepts are listed yet.</HubEmptyNote>
               )}
             </HubSection>
             <HubSection title="Relevant roles">

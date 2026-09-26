@@ -130,25 +130,6 @@ export function HubChip({ children }: { children: ReactNode }) {
   );
 }
 
-export function EditorialApplySections() {
-  return (
-    <>
-      <HubSection title="Projects">
-        <HubEmptyNote>Projects will appear here when editorial application content is published.</HubEmptyNote>
-      </HubSection>
-      <HubSection title="Exercises">
-        <HubEmptyNote>Exercises will appear here when practice content is published.</HubEmptyNote>
-      </HubSection>
-      <HubSection title="Implementations">
-        <HubEmptyNote>Implementation guides will appear here when available.</HubEmptyNote>
-      </HubSection>
-      <HubSection title="Real-world use cases">
-        <HubEmptyNote>Real-world use cases will appear here when available.</HubEmptyNote>
-      </HubSection>
-    </>
-  );
-}
-
 export function EditorialInterviewSections() {
   return (
     <>
@@ -160,9 +141,6 @@ export function EditorialInterviewSections() {
       </HubSection>
       <HubSection title="Common misconceptions">
         <HubEmptyNote>Common misconceptions will appear here when published.</HubEmptyNote>
-      </HubSection>
-      <HubSection title="Practical preparation">
-        <HubEmptyNote>Practical and interview preparation questions will appear here when published.</HubEmptyNote>
       </HubSection>
     </>
   );
@@ -204,7 +182,7 @@ export function HubPrimaryCtas({
           className="h-8 rounded-full border-violet-100 bg-white px-4 text-xs font-semibold text-slate-800 hover:bg-violet-50"
         >
           <Link to={diagnosticHref!} target="_blank" rel="noreferrer">
-            Take Diagnostic
+            Quiz
           </Link>
         </Button>
       ) : (
@@ -214,7 +192,7 @@ export function HubPrimaryCtas({
           disabled
           className="h-8 rounded-full border-violet-100 bg-white px-4 text-xs font-semibold"
         >
-          Take Diagnostic
+          Quiz
         </Button>
       )}
       <Button

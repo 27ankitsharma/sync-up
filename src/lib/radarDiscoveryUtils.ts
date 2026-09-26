@@ -38,20 +38,18 @@ export function classificationBadgeClass(classification: RadarDiscoveryClassific
 }
 
 export function priorityLabel(priority: RadarPriority) {
-  if (priority === "high") return "High Priority";
-  if (priority === "medium") return "Medium Priority";
-  return "Low Priority";
+  if (priority === "high") return "High";
+  if (priority === "medium") return "Medium";
+  return "Low";
 }
 
 export function priorityShortLabel(priority: RadarPriority) {
-  if (priority === "high") return "High Priority";
+  if (priority === "high") return "High";
   return null;
 }
 
-export function primaryCtaLabel(classification: RadarDiscoveryClassification) {
-  if (classification === "new_topic_candidate") return "Review Candidate";
-  if (classification === "existing_topic_update") return "Explore Update";
-  return "Read Insight";
+export function primaryCtaLabel(_classification: RadarDiscoveryClassification) {
+  return "Explore Update";
 }
 
 export function findMappedSyllabusTopic<T extends Topic>(discovery: RadarDiscovery, topics: T[]) {
@@ -187,6 +185,7 @@ export function sourceTypeLabel(type: RadarSourceType) {
 }
 
 export function isWithinTimeRange(isoDate: string, range: RadarTimeRange) {
+  if (range === "all") return true;
   const discovered = new Date(isoDate);
   const now = new Date();
   const diffMs = now.getTime() - discovered.getTime();

@@ -18,9 +18,8 @@ import {
 } from "@/components/ui/select";
 import {
   useProgress,
-  useQuizAttempts,
   useSaveUserProfile,
-  useSyncScoreOverview,
+  useSyncMetrics,
   useUserProfile,
 } from "@/hooks/useUser";
 
@@ -28,9 +27,8 @@ export default function Profile() {
   const { data: user, isLoading: isUserLoading } = useAuthUser();
   const { data: profile } = useUserProfile();
   const { selectedLens, lenses, setSelectedLens } = useLens();
-  const { data: syncScore } = useSyncScoreOverview(selectedLens);
+  const { data: syncMetrics, isError: syncMetricsError } = useSyncMetrics(selectedLens);
   const { data: progress = [] } = useProgress();
-  const { data: quizAttempts = [] } = useQuizAttempts();
   const { data: topics = [] } = useAllTopics();
   const saveProfile = useSaveUserProfile();
   const [role, setRole] = useState("");
@@ -52,11 +50,6 @@ export default function Profile() {
     [completedSlugs, topics],
   );
   const recentProgress = progress.slice(0, 5);
-  const averageQuizScore =
-    quizAttempts.length === 0
-      ? 0
-      : Math.round(quizAttempts.reduce((sum, attempt) => sum + attempt.score, 0) / quizAttempts.length);
-
   if (!isUserLoading && !user) {
     return <Navigate to="/login?redirect=/profile" replace />;
   }
@@ -91,10 +84,22 @@ export default function Profile() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <MetricCard label="Sync Score" value={`${syncScore?.syncScore ?? 0}%`} />
-        <MetricCard label="Important Topics" value={`${syncScore?.importantTopics ?? 0}`} />
-        <MetricCard label="Completed" value={`${syncScore?.completedTopics ?? 0}`} />
-        <MetricCard label="Quiz Accuracy" value={`${syncScore?.quizAccuracy || averageQuizScore}%`} />
+        <MetricCard
+          label="Knowledge Sync"
+          value={metricLabel(syncMetrics?.knowledgeSync.percent, syncMetricsError)}
+        />
+        <MetricCard
+          label="Radar Sync"
+          value={metricLabel(syncMetrics?.radarSync.percent, syncMetricsError)}
+        />
+        <MetricCard
+          label="Relevant Knowledge Topics"
+          value={metricCount(syncMetrics?.knowledgeSync.percent, syncMetrics?.knowledgeSync.eligibleTopics, syncMetricsError)}
+        />
+        <MetricCard
+          label="Current Radar Topics"
+          value={metricCount(syncMetrics?.radarSync.percent, syncMetrics?.radarSync.eligibleTopics, syncMetricsError)}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
@@ -237,4 +242,16 @@ function MetricCard({ label, value }: { label: string; value: string }) {
       </CardContent>
     </Card>
   );
+}
+
+function metricLabel(percent: number | null | undefined, isError: boolean) {
+  if (isError || percent === null) return "Unavailable";
+  if (percent === undefined) return "—";
+  return `${percent}%`;
+}
+
+function metricCount(percent: number | null | undefined, count: number | undefined, isError: boolean) {
+  if (isError || percent === null) return "Unavailable";
+  if (percent === undefined || count === undefined) return "—";
+  return String(count);
 }

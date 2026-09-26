@@ -3,7 +3,6 @@ import type { AvailabilityStatus, Topic } from "@/types/syllabus";
 export const KNOWLEDGE_HUB_TABS = [
   "Overview",
   "Resources",
-  "Apply",
   "Interview & FAQ",
   "Updates",
   "Related",

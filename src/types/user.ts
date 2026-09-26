@@ -34,15 +34,6 @@ export interface QuizAttempt {
   attemptedAt: string;
 }
 
-export interface QuizAttemptInput {
-  topicId: string;
-  topicSlug: string;
-  layer?: string | null;
-  score: number;
-  passed: boolean;
-  answers?: Record<string, unknown> | null;
-}
-
 export interface LessonProgress {
   id: string;
   userId: string;
@@ -75,11 +66,4 @@ export interface NewsletterSubscriptionInput {
   subscribed: boolean;
   frequency?: "weekly" | "monthly";
   interests?: string[];
-}
-
-export interface SyncScoreOverview {
-  importantTopics: number;
-  completedTopics: number;
-  quizAccuracy: number;
-  syncScore: number;
 }

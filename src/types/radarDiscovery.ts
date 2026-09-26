@@ -51,7 +51,7 @@ export interface RadarDiscovery {
   summary?: string;
 }
 
-export type RadarTimeRange = "today" | "week" | "month";
+export type RadarTimeRange = "today" | "week" | "month" | "all";
 
 export type RadarFeedTab =
   | "for_you"

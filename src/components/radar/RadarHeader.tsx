@@ -1,10 +1,8 @@
 import { useRadarFilters } from "@/contexts/RadarFilterContext";
-import { RadarAdvancedFilters } from "@/components/radar/RadarAdvancedFilters";
 import type { RadarFeedTab, RadarTimeRange } from "@/types/radarDiscovery";
-import { Info, LayoutGrid, RefreshCw, Sparkles, Sprout } from "lucide-react";
+import { Info, LayoutGrid, RefreshCw, Sprout } from "lucide-react";
 
-const feedTabs: { id: RadarFeedTab; label: string; icon: typeof Sparkles }[] = [
-  { id: "for_you", label: "For You", icon: Sparkles },
+const feedTabs: { id: RadarFeedTab; label: string; icon: typeof LayoutGrid }[] = [
   { id: "new_candidates", label: "New Topics", icon: Sprout },
   { id: "existing_updates", label: "Topic Updates", icon: RefreshCw },
   { id: "fyi", label: "FYI", icon: Info },
@@ -14,7 +12,8 @@ const feedTabs: { id: RadarFeedTab; label: string; icon: typeof Sparkles }[] = [
 function timeRangeLabel(range: RadarTimeRange) {
   if (range === "today") return "Today";
   if (range === "week") return "This week";
-  return "This month";
+  if (range === "month") return "This month";
+  return "All time";
 }
 
 export function RadarHeader({ total }: { total: number }) {
@@ -22,7 +21,7 @@ export function RadarHeader({ total }: { total: number }) {
 
   return (
     <header className="mb-4">
-      <div className="flex items-start justify-between gap-4">
+      <div>
         <div>
           <h1 className="text-xl font-bold tracking-tight text-slate-900">Your Radar</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">What changed in AI that matters to you.</p>
@@ -32,7 +31,6 @@ export function RadarHeader({ total }: { total: number }) {
             <span>{timeRangeLabel(filters.timeRange)}</span>
           </p>
         </div>
-        <RadarAdvancedFilters variant="header" />
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">

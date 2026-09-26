@@ -24,7 +24,6 @@ import {
 } from "@/lib/syllabusMetrics";
 import { Network } from "lucide-react";
 import {
-  EditorialApplySections,
   EditorialInterviewSections,
   HubChip,
   HubEmptyNote,
@@ -74,7 +73,7 @@ function LiveMapKnowledgeHub({
 
   if (!selectedObject) {
     return (
-      <KnowledgeHubEmpty description="Overview, Resources, Apply, Interview & FAQ, Updates, and Related appear here for the selected LiveMap item." />
+      <KnowledgeHubEmpty description="Overview, Resources, Interview & FAQ, Updates, and Related appear here for the selected LiveMap item." />
     );
   }
 
@@ -97,7 +96,6 @@ function LiveMapKnowledgeHub({
   const progressPercent = isCompleted ? 100 : 0;
   const siblings = topic ? siblingTopics(topic, allTopics) : [];
   const prerequisites = topic ? siblings.filter((item) => item.order < topic.order) : [];
-  const nextConcepts = topic ? siblings.filter((item) => item.order > topic.order) : [];
   const related = siblings.filter((item) => topicRelevance(item, selectedLens) !== "Optional");
   const roles = topic?.roles ?? [];
   const resources = topic?.resources ?? [];
@@ -208,7 +206,6 @@ function LiveMapKnowledgeHub({
             )}
           </HubSection>
         ),
-        Apply: <EditorialApplySections />,
         "Interview & FAQ": <EditorialInterviewSections />,
         Updates: (
           <HubSection title="Updates">
@@ -233,17 +230,6 @@ function LiveMapKnowledgeHub({
                 </div>
               ) : (
                 <HubEmptyNote>Select a topic to see related concepts in the same module.</HubEmptyNote>
-              )}
-            </HubSection>
-            <HubSection title="Next concepts">
-              {nextConcepts.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {nextConcepts.map((item) => (
-                    <HubChip key={item.id}>{item.title}</HubChip>
-                  ))}
-                </div>
-              ) : (
-                <HubEmptyNote>No next concepts are listed yet.</HubEmptyNote>
               )}
             </HubSection>
             <HubSection title="Relevant roles">

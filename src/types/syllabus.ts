@@ -71,6 +71,7 @@ export interface Topic {
   radar_week: string | null;
   radar_start_date?: string | null;
   radar_end_date?: string | null;
+  radar_classification?: "new_topic_candidate" | "existing_topic_update" | "fyi" | null;
   summary: string;
   why_it_matters: string;
   resources?: ResourceLink[];

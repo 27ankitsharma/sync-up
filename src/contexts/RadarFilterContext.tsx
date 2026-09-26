@@ -18,8 +18,8 @@ interface RadarFilterContextValue {
 }
 
 const defaultFilters: RadarFilterState = {
-  timeRange: "week",
-  feedTab: "for_you",
+  timeRange: "month",
+  feedTab: "all",
   priority: "all",
   discoveryType: "all",
   source: "all",

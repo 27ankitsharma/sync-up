@@ -35,7 +35,7 @@ const features = [
     icon: UserRound,
   },
   {
-    title: "Sync Score",
+    title: "Knowledge Sync & Radar Sync",
     kicker: "Know where you stand.",
     body: "See coverage against what matters for your work — and where the gaps are — without pretending you need everything.",
     icon: Gauge,
@@ -45,7 +45,7 @@ const features = [
 const steps = [
   { title: "Explore", body: "Orient yourself on LiveMap. Follow Radar when something new should change what you pay attention to." },
   { title: "Learn", body: "Open the course for a topic when you need depth — lessons stay tied to the same map." },
-  { title: "Track", body: "Save progress, see your Sync Score, and come back to what is still out of date." },
+  { title: "Track", body: "Save progress, see your Knowledge and Radar Sync, and come back to what is still out of date." },
 ];
 
 export default function Home() {

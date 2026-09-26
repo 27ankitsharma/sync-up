@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, GraduationCap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -13,9 +13,15 @@ interface LessonNavProps {
   activeIndex: number;
   completedIds?: string[];
   onSelect: (index: number) => void;
+  assessment?: {
+    title: string;
+    active: boolean;
+    completed: boolean;
+    onSelect: () => void;
+  } | null;
 }
 
-export function LessonNav({ lessons, activeIndex, completedIds = [], onSelect }: LessonNavProps) {
+export function LessonNav({ lessons, activeIndex, completedIds = [], onSelect, assessment }: LessonNavProps) {
   const completed = new Set(completedIds);
   const completedCount = lessons.filter((lesson) => completed.has(lesson.id)).length;
   const percent = lessons.length ? Math.round((completedCount / lessons.length) * 100) : 0;
@@ -62,6 +68,31 @@ export function LessonNav({ lessons, activeIndex, completedIds = [], onSelect }:
               </button>
             );
           })}
+          {assessment && (
+            <div className="mt-4 border-t border-violet-100 pt-4">
+              <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Assessment
+              </p>
+              <button
+                type="button"
+                onClick={assessment.onSelect}
+                aria-current={assessment.active ? "true" : undefined}
+                className={cn(
+                  "flex w-full items-start gap-2.5 rounded-md px-2.5 py-2 text-left text-sm transition-colors",
+                  assessment.active
+                    ? "bg-primary/10 font-medium text-primary"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                )}
+              >
+                {assessment.completed ? (
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/60" />
+                ) : (
+                  <GraduationCap className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                )}
+                <span className="leading-tight">{assessment.title}</span>
+              </button>
+            </div>
+          )}
         </nav>
       </ScrollArea>
     </div>

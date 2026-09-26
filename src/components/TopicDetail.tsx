@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useTopic } from "@/hooks/useSyllabus";
 import { usePublishedCourse } from "@/hooks/useCourse";
 import { TopicPageSkeleton } from "@/components/LoadingSkeleton";
 import { EmptyState } from "@/components/EmptyState";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { LessonNav } from "@/components/LessonNav";
 import { LessonCanvas } from "@/components/LessonCanvas";
 import { CourseContextSidebar } from "@/components/CourseContextSidebar";
+import { CourseAssessment } from "@/components/CourseAssessment";
 import { AppHeader } from "@/components/Layout";
-import { useCompletedLessonIds, useMarkLessonCompleted, useSaveQuizResult, useTopicCompletion } from "@/hooks/useUser";
+import { useCompletedLessonIds, useMarkLessonCompleted, useTopicCompletion } from "@/hooks/useUser";
+import { usePublishedQuiz } from "@/hooks/useQuiz";
 import { localTopicToLegacyTopic } from "@/utils/syllabusAdapter";
 import {
   availabilityUiLabel,
@@ -22,16 +22,14 @@ import {
 import { ChevronDown } from "lucide-react";
 
 export function TopicDetail({ slug }: { slug: string }) {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: localTopic, isLoading, isError } = useTopic(slug);
   const topic = useMemo(() => (localTopic ? localTopicToLegacyTopic(localTopic) : undefined), [localTopic]);
   const shouldOpenQuiz = searchParams.get("lesson") === "quiz";
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
-  const [quizMessage, setQuizMessage] = useState<string | null>(null);
   const [mobileLessonsOpen, setMobileLessonsOpen] = useState(false);
   const [mobileContextOpen, setMobileContextOpen] = useState(false);
   const { data: isQuizCleared = false } = useTopicCompletion(localTopic?.slug ?? "");
-  const saveQuizResult = useSaveQuizResult();
   const courseStatus = topicCourseStatus(localTopic);
   const diagnosticStatus = topicDiagnosticStatus(localTopic);
   const courseActive = isAvailabilityActive(courseStatus);
@@ -39,9 +37,29 @@ export function TopicDetail({ slug }: { slug: string }) {
   const { data: courseResult, isLoading: courseLoading, isError: courseError } = usePublishedCourse(
     courseActive ? localTopic?.id : null,
   );
-  const publishedLessons = courseResult?.status === "ok" ? courseResult.lessons : [];
+  const publishedLessons = useMemo(
+    () => (courseResult?.status === "ok" ? courseResult.lessons : []),
+    [courseResult],
+  );
+  const courseId = courseResult?.status === "ok" ? courseResult.course.id : null;
+  const { data: publishedQuiz } = usePublishedQuiz(courseId);
   const { data: completedLessonIds = [] } = useCompletedLessonIds(localTopic?.id);
   const markLessonCompleted = useMarkLessonCompleted();
+  const learningLessons = useMemo(
+    () => (courseActive ? publishedLessons : []),
+    [courseActive, publishedLessons],
+  );
+  const safeActiveLessonIndex = learningLessons.length ? Math.min(activeLessonIndex, learningLessons.length - 1) : null;
+  const activeLesson = safeActiveLessonIndex !== null ? learningLessons[safeActiveLessonIndex] : null;
+  const totalMinutes = learningLessons.reduce((sum, lesson) => sum + (lesson.durationMinutes ?? 0), 0);
+  const attemptId = searchParams.get("attempt");
+
+  useEffect(() => {
+    const requestedLesson = searchParams.get("lesson");
+    if (!requestedLesson || requestedLesson === "quiz") return;
+    const requestedIndex = learningLessons.findIndex((lesson) => lesson.id === requestedLesson);
+    if (requestedIndex >= 0) setActiveLessonIndex(requestedIndex);
+  }, [learningLessons, searchParams]);
 
   if (isLoading) return <TopicPageSkeleton />;
 
@@ -65,21 +83,35 @@ export function TopicDetail({ slug }: { slug: string }) {
     );
   }
 
-  const learningLessons = courseActive ? publishedLessons : [];
-  const safeActiveLessonIndex = learningLessons.length ? Math.min(activeLessonIndex, learningLessons.length - 1) : null;
-  const activeLesson = safeActiveLessonIndex !== null ? learningLessons[safeActiveLessonIndex] : null;
-  const totalMinutes = learningLessons.reduce((sum, lesson) => sum + (lesson.durationMinutes ?? 0), 0);
-
   const selectLesson = (index: number) => {
     if (!learningLessons.length) return;
     const nextIndex = Math.max(0, Math.min(index, learningLessons.length - 1));
     setActiveLessonIndex(nextIndex);
     setMobileLessonsOpen(false);
     const lesson = learningLessons[nextIndex];
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("lesson", lesson.id);
+    nextParams.delete("attempt");
+    setSearchParams(nextParams, { replace: true });
     if (localTopic && lesson) {
       markLessonCompleted.mutate({ lessonId: lesson.id, topicId: localTopic.id });
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const selectAssessment = () => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("lesson", "quiz");
+    setSearchParams(nextParams, { replace: true });
+    setMobileLessonsOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const setAttemptId = (nextAttemptId: string) => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("lesson", "quiz");
+    nextParams.set("attempt", nextAttemptId);
+    setSearchParams(nextParams, { replace: true });
   };
 
   const courseUnavailableState = (() => {
@@ -111,31 +143,23 @@ export function TopicDetail({ slug }: { slug: string }) {
     return null;
   })();
 
-  const clearQuiz = async () => {
-    if (!localTopic) return;
-
-    try {
-      setQuizMessage(null);
-      await saveQuizResult.mutateAsync({
-        topicId: localTopic.id,
-        topicSlug: localTopic.slug,
-        layer: localTopic.layer,
-        score: 100,
-        passed: true,
-      });
-      setQuizMessage("Quiz cleared and progress saved.");
-    } catch (error) {
-      setQuizMessage(error instanceof Error ? error.message : "Unable to save quiz progress.");
-    }
-  };
-
   const lessonNav =
     learningLessons.length > 0 && safeActiveLessonIndex !== null ? (
       <LessonNav
         lessons={learningLessons}
-        activeIndex={safeActiveLessonIndex}
+        activeIndex={shouldOpenQuiz ? -1 : safeActiveLessonIndex}
         completedIds={completedLessonIds}
         onSelect={selectLesson}
+        assessment={
+          publishedQuiz || diagnosticActive
+            ? {
+                title: publishedQuiz?.title ?? "Course Quiz",
+                active: shouldOpenQuiz,
+                completed: isQuizCleared,
+                onSelect: selectAssessment,
+              }
+            : null
+        }
       />
     ) : null;
 
@@ -148,7 +172,7 @@ export function TopicDetail({ slug }: { slug: string }) {
         </aside>
 
         <main className="min-w-0 flex-1 px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-          {learningLessons.length > 0 && (
+          {(learningLessons.length > 0 || publishedQuiz) && (
             <div className="mb-4 space-y-2 lg:hidden">
               <Collapsible open={mobileLessonsOpen} onOpenChange={setMobileLessonsOpen}>
                 <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-violet-100 bg-white px-3 py-2.5 text-sm font-medium text-slate-700">
@@ -171,24 +195,14 @@ export function TopicDetail({ slug }: { slug: string }) {
             </div>
           )}
 
-          {diagnosticActive && (
-            <Card className={`mb-4 border-primary/20 ${shouldOpenQuiz ? "bg-primary/10 ring-2 ring-primary/20" : "bg-primary/5"}`}>
-              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Before You Start</p>
-                  <h2 className="mt-1 text-base font-semibold text-foreground">Quick knowledge check · 3 min</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    This diagnostic helps SyncRadar understand what you already know before recommending depth and next steps.
-                  </p>
-                </div>
-                <Button size="sm" onClick={clearQuiz} disabled={isQuizCleared || saveQuizResult.isPending}>
-                  {isQuizCleared ? "Diagnostic complete" : saveQuizResult.isPending ? "Saving..." : "Take Diagnostic"}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {courseActive && courseLoading ? (
+          {shouldOpenQuiz && courseId ? (
+            <CourseAssessment
+              courseId={courseId}
+              topicSlug={localTopic?.slug ?? slug}
+              attemptId={attemptId}
+              onAttemptChange={setAttemptId}
+            />
+          ) : courseActive && courseLoading ? (
             <EmptyState icon="⏳" title="Loading course..." description="Fetching published lessons for this topic." />
           ) : courseUnavailableState || !activeLesson || safeActiveLessonIndex === null ? (
             <EmptyState
@@ -197,22 +211,7 @@ export function TopicDetail({ slug }: { slug: string }) {
               description={courseUnavailableState?.description ?? "This lesson is not available."}
             />
           ) : (
-            <>
-              {quizMessage && (
-                <p className="mb-4 text-xs text-muted-foreground">
-                  {quizMessage}
-                  {quizMessage.includes("signed in") && (
-                    <>
-                      {" "}
-                      <Link className="text-primary underline" to={`/login?redirect=/topic/${localTopic?.slug ?? slug}`}>
-                        Sign in here.
-                      </Link>
-                    </>
-                  )}
-                </p>
-              )}
-              <LessonCanvas lessons={learningLessons} activeIndex={safeActiveLessonIndex} onSelect={selectLesson} />
-            </>
+            <LessonCanvas lessons={learningLessons} activeIndex={safeActiveLessonIndex} onSelect={selectLesson} />
           )}
         </main>
 

@@ -1,0 +1,237 @@
+{
+  "quiz_id": "quiz_model_hardware_standard_01",
+  "course_id": "course-model-hardware-standard",
+  "title": "Model Hardware Standard (MHS) — Quiz",
+  "description": "Test your understanding of MHS, standardized hardware access, agent orchestration, safety, and current limitations.",
+  "questions_per_attempt": 10,
+  "passing_score": 80,
+  "max_attempts": 3,
+  "status": "Published",
+  "questions": [
+    {
+      "question_id": "q_mhs_001",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "What is the primary purpose of the Model Hardware Standard (MHS)?",
+      "options": [
+        {"value": "A", "label": "To train a new foundation model for robotics", "feedback": "MHS is not a model-training method or a new foundation model."},
+        {"value": "B", "label": "To provide a shared specification for AI agents to safely operate programmable physical devices", "feedback": "Correct. MHS standardizes how agents discover, understand, and operate programmable hardware."},
+        {"value": "C", "label": "To replace all existing laboratory hardware", "feedback": "MHS connects to programmable devices; it does not replace the devices themselves."},
+        {"value": "D", "label": "To store experimental results in a universal database", "feedback": "MHS may help agents receive device data, but universal data storage is not its primary purpose."}
+      ],
+      "correct_answer": "B",
+      "hint": "Focus on the interface between AI agents and physical equipment.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_mhs_002",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Why is coordinating several laboratory devices difficult without a standard such as MHS?",
+      "options": [
+        {"value": "A", "label": "Every device must use the same physical location", "feedback": "Physical location is not the core integration problem described in the course."},
+        {"value": "B", "label": "AI agents cannot process any sensor data", "feedback": "Agents can process sensor data; the challenge is accessing heterogeneous devices consistently and safely."},
+        {"value": "C", "label": "Devices may use different APIs, SDKs, languages, data formats, and safety constraints", "feedback": "Correct. These differences typically require specialists to build bespoke integrations."},
+        {"value": "D", "label": "Laboratory devices cannot be programmed", "feedback": "MHS specifically targets devices that have a programmable interface."}
+      ],
+      "correct_answer": "C",
+      "hint": "Think about what changes when instruments come from different vendors.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_mhs_003",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Which device is within the intended scope of MHS?",
+      "options": [
+        {"value": "A", "label": "Any device with a programmable interface", "feedback": "Correct. A programmable interface is the key technical requirement for connecting a device through MHS."},
+        {"value": "B", "label": "Only devices manufactured by Anthropic", "feedback": "MHS is intended to work across manufacturers, not only with devices from one company."},
+        {"value": "C", "label": "Only microscopes used in biology labs", "feedback": "Microscopes are one example, but the intended scope includes many laboratory and manufacturing devices."},
+        {"value": "D", "label": "Only devices that already implement MCP internally", "feedback": "The device needs a programmable interface; an MHS driver can expose it through supported control mechanisms."}
+      ],
+      "correct_answer": "A",
+      "hint": "The requirement is about whether software can control the device.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_mhs_004",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "What does it mean that MHS is model-agnostic?",
+      "options": [
+        {"value": "A", "label": "MHS operates without any software", "feedback": "MHS is software infrastructure and still requires an agent harness or other controlling software."},
+        {"value": "B", "label": "MHS can only be used by the model that created its driver", "feedback": "That would be model-specific, which is the opposite of model-agnostic."},
+        {"value": "C", "label": "MHS automatically converts one AI model into another", "feedback": "MHS standardizes hardware access; it does not convert AI models."},
+        {"value": "D", "label": "Different agent harnesses and models can access MHS through standard protocols", "feedback": "Correct. MHS is not tied to one model and can be reached through protocols such as MCP."}
+      ],
+      "correct_answer": "D",
+      "hint": "Ask whether the standard is locked to one AI model.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_005",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "What role does an MHS driver play?",
+      "options": [
+        {"value": "A", "label": "It physically repairs broken equipment", "feedback": "A driver is software; it does not physically repair hardware."},
+        {"value": "B", "label": "It translates between software and a hardware device through a standardized interface", "feedback": "Correct. The driver hides device-specific integration details behind a common interface."},
+        {"value": "C", "label": "It decides the scientific goal without human input", "feedback": "Setting scientific goals is separate from the driver's translation and device-description role."},
+        {"value": "D", "label": "It replaces the agent's reasoning model", "feedback": "The driver exposes hardware capabilities; it does not replace the agent's reasoning."}
+      ],
+      "correct_answer": "B",
+      "hint": "Think of a driver as the software bridge to a device.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_mhs_006",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Which pair best represents the simple device primitives used by an MHS driver?",
+      "options": [
+        {"value": "A", "label": "Train and evaluate", "feedback": "Those are model-development activities, not hardware driver primitives."},
+        {"value": "B", "label": "Upload and download", "feedback": "File transfer is not the general read/write abstraction described for MHS devices."},
+        {"value": "C", "label": "Read and write", "feedback": "Correct. Examples include reading a temperature and writing a new temperature setting."},
+        {"value": "D", "label": "Prompt and complete", "feedback": "Those terms describe model interaction rather than physical-device operations."}
+      ],
+      "correct_answer": "C",
+      "hint": "One primitive retrieves a device value; the other changes one.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_mhs_007",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "What does standardized device discoverability enable?",
+      "options": [
+        {"value": "A", "label": "Devices and agents can find and communicate with each other across networks without a bespoke translator for every connection", "feedback": "Correct. Standard discovery reduces the need for pair-by-pair integration software."},
+        {"value": "B", "label": "Every device becomes publicly accessible on the internet", "feedback": "Discoverability does not imply unrestricted public access; deployment and safety controls still matter."},
+        {"value": "C", "label": "Devices no longer need programmable interfaces", "feedback": "A programmable interface remains a prerequisite for MHS integration."},
+        {"value": "D", "label": "All hardware runs the same operating system", "feedback": "MHS provides a common interface without requiring identical device operating systems."}
+      ],
+      "correct_answer": "A",
+      "hint": "Consider the integration work eliminated by a common discovery format.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_008",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Why can natural-language tags in an MHS driver be important for safe operation?",
+      "options": [
+        {"value": "A", "label": "They make the physical device lighter", "feedback": "Tags describe characteristics; they do not alter the device's physical properties."},
+        {"value": "B", "label": "They remove the need to enforce safety limits", "feedback": "The reference information includes which safety limits should be enforced rather than removing them."},
+        {"value": "C", "label": "They guarantee that an AI model will never make a mistake", "feedback": "Metadata improves context but cannot guarantee error-free reasoning or operation."},
+        {"value": "D", "label": "They capture characteristics and constraints that may not be evident from code alone", "feedback": "Correct. Information such as a robot arm's weight, capabilities, adjustments, and safety limits helps an agent operate it appropriately."}
+      ],
+      "correct_answer": "D",
+      "hint": "Some essential machine knowledge previously lived in manuals or in experts' experience.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_009",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Which set lists the three mechanisms described for controlling hardware through MHS?",
+      "options": [
+        {"value": "A", "label": "Email, spreadsheets, and dashboards", "feedback": "These may support a workflow but are not the three MHS hardware-control mechanisms."},
+        {"value": "B", "label": "MCP, command-line interface, and code files or APIs", "feedback": "Correct. These mechanisms can work together to orchestrate one or more devices."},
+        {"value": "C", "label": "Bluetooth, Wi-Fi, and Ethernet", "feedback": "These are connectivity technologies, not the control interfaces identified by MHS."},
+        {"value": "D", "label": "Prompts, embeddings, and fine-tuning", "feedback": "These relate to model systems rather than direct hardware-control mechanisms."}
+      ],
+      "correct_answer": "B",
+      "hint": "One mechanism is an agent protocol, one is terminal-based, and one is programmatic.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_010",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Why might an agent chain MHS driver commands into a code file?",
+      "options": [
+        {"value": "A", "label": "To hide all device state from the agent", "feedback": "MHS is intended to expose device state and operating data, not hide it."},
+        {"value": "B", "label": "To prevent devices from executing any action", "feedback": "The purpose is to execute operations efficiently, not prevent execution."},
+        {"value": "C", "label": "To run long or fast operations without reasoning online at every individual step", "feedback": "Correct. A deterministic command sequence can execute directly while the agent supervises at a higher level."},
+        {"value": "D", "label": "To permanently replace every adaptive workflow", "feedback": "Code files are useful for suitable subroutines, while the agent may still monitor and adapt the larger workflow."}
+      ],
+      "correct_answer": "C",
+      "hint": "Compare high-level supervision with reasoning before every low-level command.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_011",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "What integration-time improvement does the MHS announcement describe?",
+      "options": [
+        {"value": "A", "label": "From weeks or months to hours or minutes", "feedback": "Correct. Standard drivers can greatly reduce bespoke setup and integration effort."},
+        {"value": "B", "label": "From minutes to several years", "feedback": "This reverses the improvement described by the announcement."},
+        {"value": "C", "label": "From one second to zero time", "feedback": "MHS reduces integration work but does not make it instantaneous."},
+        {"value": "D", "label": "No change in integration time", "feedback": "Reducing integration time is one of the central benefits presented for MHS."}
+      ],
+      "correct_answer": "A",
+      "hint": "The comparison contrasts bespoke integrations with standardized drivers.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_mhs_012",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "An experiment needs a microscope, liquid handler, robotic arm, and analyzer. What does MHS primarily contribute?",
+      "options": [
+        {"value": "A", "label": "A requirement that all four devices come from the same vendor", "feedback": "MHS is valuable precisely when heterogeneous devices need to work together."},
+        {"value": "B", "label": "A replacement for the scientific experiment design", "feedback": "MHS enables execution and orchestration but does not replace sound experimental design."},
+        {"value": "C", "label": "A guarantee that no hardware failure can occur", "feedback": "MHS can support monitoring and recovery, but it cannot guarantee that physical hardware never fails."},
+        {"value": "D", "label": "A common way for an agent to discover, control, and coordinate the devices", "feedback": "Correct. MHS creates a shared interface across otherwise different instruments."}
+      ],
+      "correct_answer": "D",
+      "hint": "Focus on interoperability across multiple instruments.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_013",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "What current limitation was highlighted by early physical-lab experiments?",
+      "options": [
+        {"value": "A", "label": "AI models cannot call software functions", "feedback": "The experiments demonstrate that models can call tools and operate devices through MHS."},
+        {"value": "B", "label": "AI models can struggle with physical, chemical, and biological constraints that require real-world intuition", "feedback": "Correct. For example, retrying a liquid-handling operation could worsen bubbles when the model did not understand the underlying physics."},
+        {"value": "C", "label": "MHS cannot receive operating data from devices", "feedback": "Receiving device state and operating data is a core part of the MHS workflow."},
+        {"value": "D", "label": "Programmable laboratory devices do not exist", "feedback": "MHS was tested with multiple programmable laboratory and manufacturing devices."}
+      ],
+      "correct_answer": "B",
+      "hint": "Think about why software reasoning may fail when a problem depends on physical intuition.",
+      "difficulty": "Hard"
+    },
+    {
+      "question_id": "q_mhs_014",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Why was MHS initially released as a research preview rather than immediately made fully open source?",
+      "options": [
+        {"value": "A", "label": "To prevent researchers from learning that MHS exists", "feedback": "The research preview was publicly announced and offered to selected partners."},
+        {"value": "B", "label": "Because MHS only works on one secret device", "feedback": "MHS is designed for programmable devices across several domains."},
+        {"value": "C", "label": "To collaborate on safety evaluations and best practices before broader release", "feedback": "Correct. Operating physical equipment introduces safety and misuse concerns that require careful evaluation."},
+        {"value": "D", "label": "Because standardization is not part of MHS", "feedback": "A shared standard is the central idea of MHS."}
+      ],
+      "correct_answer": "C",
+      "hint": "Physical-world actions raise deployment concerns beyond ordinary text generation.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_mhs_015",
+      "topic_id": "agent-foundations-agent-environments-model-hardware-standard",
+      "question_type": "single_select",
+      "question": "Which workflow best illustrates the higher-level benefit MHS can provide to an AI agent?",
+      "options": [
+        {"value": "A", "label": "Sequence instruments, monitor results, adjust parameters in real time, and sometimes recover from errors", "feedback": "Correct. MHS enables an agent to supervise and adapt coordinated physical workflows."},
+        {"value": "B", "label": "Generate a static paragraph without interacting with a device", "feedback": "Text generation alone does not demonstrate MHS-enabled physical orchestration."},
+        {"value": "C", "label": "Run one fixed command without reading any result", "feedback": "MHS supports richer closed-loop monitoring and adjustment across devices."},
+        {"value": "D", "label": "Ask a human specialist to manually translate every device message", "feedback": "Reducing bespoke translation and manual integration is a key motivation for MHS."}
+      ],
+      "correct_answer": "A",
+      "hint": "Look for a closed-loop workflow spanning observation, coordination, and adaptation.",
+      "difficulty": "Medium"
+    }
+  ]
+}

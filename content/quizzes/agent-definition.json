@@ -1,0 +1,192 @@
+{
+  "quiz_id": "quiz_agent_definition_01",
+  "course_id": "course-agent-definition",
+  "title": "Agent Definition — Quiz",
+  "description": "Test your understanding of AI agents, autonomous decision-making, architecture, and PRMA.",
+  "questions_per_attempt": 10,
+  "passing_score": 80,
+  "max_attempts": 3,
+  "status": "Published",
+  "questions": [
+    {
+      "question_id": "q_agent_001",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "A system receives the goal “Find the best flight for my trip.” It can search flights, compare options, change its search strategy based on results, and decide when it has found a suitable option. Which characteristic most clearly makes this an agent rather than a predefined workflow?",
+      "options": [
+        {"value": "A", "label": "It follows a fixed sequence of steps", "feedback": "A fixed sequence describes a predefined workflow rather than autonomous decision-making."},
+        {"value": "B", "label": "It autonomously selects its next actions based on context", "feedback": "The system can decide what to do next based on what it discovers, which is a key characteristic of an agent."},
+        {"value": "C", "label": "It uses a large language model", "feedback": "Using an LLM is not by itself what makes a system an agent."},
+        {"value": "D", "label": "It stores information", "feedback": "Memory can be useful for agents, but storing information alone does not make a system an agent."}
+      ],
+      "correct_answer": "B",
+      "hint": "Focus on whether the system decides its next step or simply follows predetermined steps.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_agent_002",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "Which combination describes the necessary conditions presented for a system to be called an agent?",
+      "options": [
+        {"value": "A", "label": "Goal, autonomous decision-making, and ability to act", "feedback": "Correct. These are the three necessary conditions identified in the course."},
+        {"value": "B", "label": "LLM, memory, and learning", "feedback": "These can make an agent more capable, but none is required for a system to be an agent."},
+        {"value": "C", "label": "Tools, multiple steps, and feedback", "feedback": "These are common extensions, not the minimum defining conditions."},
+        {"value": "D", "label": "Prompt, database, and user interface", "feedback": "These implementation components do not define whether a system is an agent."}
+      ],
+      "correct_answer": "A",
+      "hint": "Look for the combination summarized as Goal + Decision + Action.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_agent_003",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "Which task is best handled by a predefined automation rather than an agent?",
+      "options": [
+        {"value": "A", "label": "Investigate why sales dropped and decide what deserves attention", "feedback": "This requires contextual investigation and decisions, making it suitable for an agent."},
+        {"value": "B", "label": "Plan a trip while adapting choices to budget and availability", "feedback": "This requires coordinated decisions and adaptation, making it suitable for an agent."},
+        {"value": "C", "label": "Every Monday, calculate fixed metrics and email the same report", "feedback": "Correct. The steps and schedule are predetermined, so a workflow automation is sufficient."},
+        {"value": "D", "label": "Prioritize emails based on their meaning and current context", "feedback": "This requires interpretation and prioritization, which are agent-like decisions."}
+      ],
+      "correct_answer": "C",
+      "hint": "Choose the task whose steps do not need to change based on what the system discovers.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_agent_004",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "What is the main difference between a model and an agent?",
+      "options": [
+        {"value": "A", "label": "A model generates or transforms information; an agent decides and acts toward a goal", "feedback": "Correct. The agent adds goal-directed decision-making and action around model capabilities."},
+        {"value": "B", "label": "A model always has memory; an agent never does", "feedback": "Memory is optional for an agent and is not the defining difference."},
+        {"value": "C", "label": "A model uses tools; an agent cannot use tools", "feedback": "Agents commonly use tools to affect their environment."},
+        {"value": "D", "label": "There is no meaningful difference", "feedback": "A model may be part of an agent, but it does not by itself provide autonomous goal-directed action."}
+      ],
+      "correct_answer": "A",
+      "hint": "Distinguish producing an output from choosing and performing actions.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_agent_005",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "In the weather-agent architecture, what is the agent component's primary role?",
+      "options": [
+        {"value": "A", "label": "Store every piece of information permanently", "feedback": "Storage is associated with memory, not the agent's primary orchestration role."},
+        {"value": "B", "label": "Provide current weather data directly", "feedback": "A weather tool or API provides current weather data."},
+        {"value": "C", "label": "Orchestrate the process and decide what to do", "feedback": "Correct. The agent coordinates the components and selects the next action."},
+        {"value": "D", "label": "Only format the final response", "feedback": "Formatting may occur, but it does not capture the agent's decision-making role."}
+      ],
+      "correct_answer": "C",
+      "hint": "Think of the component described as the decision maker or orchestrator.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_agent_006",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "Which sequence best represents the PRMA loop in this example?",
+      "options": [
+        {"value": "A", "label": "Perception → Memory → Reasoning → Action", "feedback": "Correct. This sequence captures perceiving context, using memory, reasoning, and then acting."},
+        {"value": "B", "label": "Planning → Retrieval → Modeling → Analysis", "feedback": "These terms do not represent the PRMA loop used by this assessment."},
+        {"value": "C", "label": "Prompt → Response → Memory → Automation", "feedback": "This describes implementation concepts, not the PRMA operating loop."},
+        {"value": "D", "label": "Prediction → Ranking → Monitoring → Approval", "feedback": "This sequence is not the PRMA loop."}
+      ],
+      "correct_answer": "A",
+      "hint": "Identify the sequence that moves from observing context to taking an action.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_agent_007",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "Does an agent have to use a large language model?",
+      "options": [
+        {"value": "A", "label": "Yes, every agent is an LLM application", "feedback": "Agents existed before LLMs, and an LLM is not a necessary condition."},
+        {"value": "B", "label": "Yes, but only when it has memory", "feedback": "Neither an LLM nor memory is necessary for a system to qualify as an agent."},
+        {"value": "C", "label": "No, it must instead use a database", "feedback": "A database is also not a defining requirement."},
+        {"value": "D", "label": "No, an agent can pursue goals, decide, and act without an LLM", "feedback": "Correct. Goal-directed autonomous decisions and action are the defining conditions."}
+      ],
+      "correct_answer": "D",
+      "hint": "Separate a popular implementation technology from the defining behavior.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_agent_008",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "A stateless system receives a goal, independently chooses one action, and performs it. Can it still be an agent?",
+      "options": [
+        {"value": "A", "label": "No, all agents require persistent memory", "feedback": "Memory is useful but is not a necessary condition."},
+        {"value": "B", "label": "Yes, memory and multiple steps are not required", "feedback": "Correct. A system can qualify through goal, autonomous decision-making, and action."},
+        {"value": "C", "label": "No, every agent must learn during execution", "feedback": "Learning during execution is not required."},
+        {"value": "D", "label": "Only if it follows a fixed sequence", "feedback": "Following a fixed sequence weakens the defining autonomous decision-making characteristic."}
+      ],
+      "correct_answer": "B",
+      "hint": "Recall which characteristics are common extensions rather than necessary conditions.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_agent_009",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "In a weather agent, which component would call get_weather(\"Gurgaon\")?",
+      "options": [
+        {"value": "A", "label": "Action", "feedback": "Correct. Calling the tool is the action that interacts with the environment."},
+        {"value": "B", "label": "Perception", "feedback": "Perception receives and understands the current request and context."},
+        {"value": "C", "label": "Memory", "feedback": "Memory may retrieve Gurgaon as the saved location, but it does not make the tool call."},
+        {"value": "D", "label": "Reasoning", "feedback": "Reasoning decides that a weather lookup is needed; action performs the lookup."}
+      ],
+      "correct_answer": "A",
+      "hint": "Choose the stage that affects or interacts with the environment.",
+      "difficulty": "Easy"
+    },
+    {
+      "question_id": "q_agent_010",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "When is building an agent most justified?",
+      "options": [
+        {"value": "A", "label": "When a deterministic calculation has one known procedure", "feedback": "A narrow deterministic tool is simpler and more appropriate."},
+        {"value": "B", "label": "Whenever a task can mention AI", "feedback": "Not every AI capability needs to become an agent."},
+        {"value": "C", "label": "When the next action depends on context, results, and changing conditions", "feedback": "Correct. Context-dependent decisions and adaptation justify agent behavior."},
+        {"value": "D", "label": "Only when the system has a graphical interface", "feedback": "A graphical interface has no bearing on whether agent behavior is needed."}
+      ],
+      "correct_answer": "C",
+      "hint": "Look for a task where a fixed sequence would be hard to maintain.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_agent_011",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "Which statement about tools is accurate?",
+      "options": [
+        {"value": "A", "label": "Tools are mandatory for every agent", "feedback": "Tools are common capabilities, but the course does not list them as a necessary condition."},
+        {"value": "B", "label": "Tools can let an agent affect external systems, but they are not themselves what defines an agent", "feedback": "Correct. Tools enable actions, while goal-directed autonomous decision-making defines agent behavior."},
+        {"value": "C", "label": "Any system that calls a tool is automatically an agent", "feedback": "A fixed workflow can also call tools without autonomously deciding its next action."},
+        {"value": "D", "label": "Agents cannot use APIs", "feedback": "APIs are a common interface through which agents act."}
+      ],
+      "correct_answer": "B",
+      "hint": "Separate an available capability from the behavior that decides when and how to use it.",
+      "difficulty": "Medium"
+    },
+    {
+      "question_id": "q_agent_012",
+      "topic_id": "agent-foundations-agent-concepts-agent-definition",
+      "question_type": "single_select",
+      "question": "A system always calls the same API and returns the response without evaluating context. What is the best classification?",
+      "options": [
+        {"value": "A", "label": "An agent, because every API call is an autonomous action", "feedback": "Calling an API alone does not demonstrate autonomous decision-making."},
+        {"value": "B", "label": "An agent, because it performs more than one software operation", "feedback": "The number of operations does not define an agent."},
+        {"value": "C", "label": "A predefined tool or workflow, because its behavior is fixed", "feedback": "Correct. The system follows predetermined behavior and does not select its next action based on context."},
+        {"value": "D", "label": "A learning agent, because API responses are data", "feedback": "Receiving data does not mean the system learns or acts autonomously."}
+      ],
+      "correct_answer": "C",
+      "hint": "Ask whether the system chooses among possible next actions.",
+      "difficulty": "Medium"
+    }
+  ]
+}

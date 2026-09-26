@@ -1,6 +1,6 @@
 # SyncRadar.ai
 
-SyncRadar.ai is an AI literacy platform built around SyncUp: LiveMap, Radar, AI-generated course content, and Sync Score. The app is knowledge-centric rather than course-centric, organizing learning as Track -> Subject -> Module -> Topic -> Lesson.
+SyncRadar.ai is an AI literacy platform built around SyncUp: LiveMap, Radar, course content, Knowledge Sync, and Radar Sync. The app is knowledge-centric rather than course-centric, organizing learning as Track -> Subject -> Module -> Topic -> Lesson.
 
 This build is intentionally zero-backend: the frontend loads a generated static syllabus, reads course content from Sanity, and stores user progress on the current device with localStorage.
 
@@ -12,7 +12,7 @@ syllabus.xlsx
   -> public/syllabus.json
   -> React frontend
       -> LiveMap / syllabus navigation
-      -> Radar / Sync Score
+      -> Knowledge Sync / Radar Sync
       -> localStorage progress utilities
 
 Sanity CMS
@@ -87,11 +87,11 @@ Create a Supabase project and configure these environment variables:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-Run `supabase/schema.sql` in the Supabase SQL editor to create:
+Run `supabase/schema.sql`, then the SQL files in `supabase/migrations/` in timestamp order. The assessment migration creates the secure quiz/question/attempt/answer tables and runtime functions.
 
 - `profiles`
 - `completed_topic`
-- `quiz_attempt`
+- `quiz_attempts`
 - `saved_topics`
 - `subscription`
 
@@ -99,9 +99,9 @@ Supabase Auth owns user authentication. Application code should access auth/prof
 
 ## Course Content
 
-Course content is JSON-backed for the MVP. UI code should access content through `ContentService`, not by importing JSON directly.
+Course lessons are Markdown-authored and synced to Supabase. UI code accesses persisted content through the existing course services.
 
-The first lesson of each course should be a quiz. Clearing that opening quiz records completion for progress and, for radar topics, Sync Score.
+A course quiz is a separate assessment, not a lesson. Passing its server-graded assessment records course/topic completion. See `CONTENT_AUTHORING.md` and `QUIZ_AUTHORING.md`.
 
 ## Adding a Radar Topic
 
@@ -113,11 +113,9 @@ The first lesson of each course should be a quiz. Clearing that opening quiz rec
 6. Restart or refresh the frontend.
 7. Add or update related topic/course content in the canonical JSON source when ready.
 
-## Sync Score vs Overall Progress
+## Knowledge Sync and Radar Sync
 
-Sync Score appears on the Radar page. It only considers radar topics within the rolling 8-week window, grouped by dynamic `Layer`, and stores weekly snapshots on the current device.
-
-Overall Progress appears in LiveMap. It counts all topic quiz completions regardless of Radar status or age, then aggregates modules, subjects, and tracks by completed topics divided by total topics.
+Knowledge Sync is the percentage of selected-role `Must` topics with a published assessment that the learner has passed. Radar Sync applies the same assessment-pass rule to selected-role `Must`/`Good` Radar topics in the rolling 8-week window. Course or lesson completion does not count as demonstrated mastery. Both metrics use authoritative Supabase quiz attempts and remain unavailable when no eligible assessment exists.
 
 Both metrics are backed by Supabase for signed-in users. Anonymous users can browse content, but saved quiz progress and personalized metrics require authentication.
 

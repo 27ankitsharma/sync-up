@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "@/services/UserService";
-import type { QuizAttemptInput, UserProfileInput } from "@/types/user";
+import { SyncMetricsService } from "@/services/SyncMetricsService";
+import type { UserProfileInput } from "@/types/user";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -11,7 +12,6 @@ export function useCurrentUser() {
     staleTime: FIVE_MINUTES,
   });
 }
-
 export function useUserProfile() {
   return useQuery({
     queryKey: ["user-profile"],
@@ -19,7 +19,6 @@ export function useUserProfile() {
     staleTime: FIVE_MINUTES,
   });
 }
-
 export function useSaveUserProfile() {
   const queryClient = useQueryClient();
 
@@ -47,10 +46,11 @@ export function useQuizAttempts() {
   });
 }
 
-export function useSyncScoreOverview(selectedLens?: string | null) {
+export function useSyncMetrics(selectedLens?: string | null) {
   return useQuery({
-    queryKey: ["sync-score-overview", selectedLens ?? null],
-    queryFn: () => UserService.getSyncScore(selectedLens ?? null),
+    queryKey: ["sync-metrics", selectedLens ?? null],
+    queryFn: () => SyncMetricsService.getOverview(selectedLens ?? ""),
+    enabled: Boolean(selectedLens),
     staleTime: FIVE_MINUTES,
   });
 }
@@ -90,32 +90,5 @@ export function useMarkLessonCompleted() {
     onSuccess: (_value, input) => {
       queryClient.invalidateQueries({ queryKey: ["completed-lesson-ids", input.topicId] });
     },
-  });
-}
-
-export function useSaveQuizResult() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (input: QuizAttemptInput) => UserService.saveQuizResult(input),
-    onSuccess: (_attempt, input) => {
-      queryClient.invalidateQueries({ queryKey: ["user-progress"] });
-      queryClient.invalidateQueries({ queryKey: ["quiz-attempts"] });
-      queryClient.invalidateQueries({ queryKey: ["completed-topic-slugs"] });
-      queryClient.invalidateQueries({ queryKey: ["topic-completion", input.topicSlug] });
-      queryClient.invalidateQueries({ queryKey: ["sync-score"] });
-      queryClient.invalidateQueries({ queryKey: ["sync-score-overview"] });
-    },
-  });
-}
-
-export function useSyncScoreByLayer(layers: string[]) {
-  return useQuery({
-    queryKey: ["sync-score", layers],
-    queryFn: async () =>
-      Object.fromEntries(
-        await Promise.all(layers.map(async (layer) => [layer, await UserService.getSyncScoreHistory(layer)])),
-      ),
-    staleTime: FIVE_MINUTES,
   });
 }
