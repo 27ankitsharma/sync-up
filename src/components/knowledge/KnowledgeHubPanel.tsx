@@ -31,7 +31,7 @@ export function KnowledgeHubPanel({
   }, [title]);
 
   return (
-    <aside className="sr-readable-panel hidden xl:flex min-w-[400px] w-[480px] max-w-[600px] flex-1 shrink-0 flex-col rounded-xl border border-violet-100 bg-white shadow-[0_10px_35px_-25px_rgba(87,63,191,0.45)]">
+    <aside className="hidden xl:flex min-w-[400px] w-[480px] max-w-[600px] flex-1 shrink-0 flex-col rounded-xl border border-violet-100 bg-white shadow-[0_10px_35px_-25px_rgba(87,63,191,0.45)]">
       <div className="border-b border-violet-100 p-4 pb-0">
         <div className="flex items-center justify-between">
           <div>
@@ -101,7 +101,7 @@ export function KnowledgeHubPanel({
 
 export function KnowledgeHubEmpty({ description }: { description: string }) {
   return (
-    <aside className="sr-readable-panel hidden xl:flex min-w-[400px] w-[480px] max-w-[600px] flex-1 shrink-0 flex-col rounded-xl border border-violet-100 bg-white p-4 shadow-[0_10px_35px_-25px_rgba(87,63,191,0.45)]">
+    <aside className="hidden xl:flex min-w-[400px] w-[480px] max-w-[600px] flex-1 shrink-0 flex-col rounded-xl border border-violet-100 bg-white p-4 shadow-[0_10px_35px_-25px_rgba(87,63,191,0.45)]">
       <p className="text-sm font-bold">Knowledge Hub</p>
       <div className="mt-8 rounded-2xl border border-dashed border-violet-200 bg-violet-50/40 p-5 text-center">
         <p className="text-sm font-semibold">Select an item to inspect it.</p>

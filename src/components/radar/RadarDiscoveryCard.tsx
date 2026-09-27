@@ -30,7 +30,7 @@ export function RadarDiscoveryCard({
 
   return (
     <article
-      className={`sr-readable-panel relative rounded-xl border bg-white p-4 transition-all ${
+      className={`relative rounded-xl border bg-white p-4 transition-all ${
         selected
           ? "border-primary shadow-[0_0_0_1px_hsl(var(--primary))]"
           : "border-violet-100 hover:border-violet-200 hover:shadow-sm"

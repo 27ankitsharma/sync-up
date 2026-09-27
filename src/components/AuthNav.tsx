@@ -7,12 +7,12 @@ export function AuthNav() {
   const signOut = useSignOut();
 
   if (isLoading) {
-    return <span className="px-2 text-[15px] text-muted-foreground">Checking...</span>;
+    return <span className="text-xs text-muted-foreground px-2">Checking...</span>;
   }
 
   if (!user) {
     return (
-      <Button asChild size="sm" variant="outline" className="h-8 text-base">
+      <Button asChild size="sm" variant="outline" className="h-8">
         <Link to="/login">Sign in</Link>
       </Button>
     );
@@ -22,14 +22,14 @@ export function AuthNav() {
     <div className="flex items-center gap-2">
       <Link
         to="/profile"
-        className="hidden max-w-40 truncate text-[15px] text-muted-foreground hover:text-foreground sm:inline"
+        className="hidden sm:inline max-w-40 truncate text-xs text-muted-foreground hover:text-foreground"
       >
         {user.email}
       </Link>
       <Button
         size="sm"
         variant="ghost"
-        className="h-8 text-base"
+        className="h-8"
         disabled={signOut.isPending}
         onClick={() => signOut.mutate()}
       >

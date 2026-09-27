@@ -151,7 +151,7 @@
   }
 
   .sr-pill {
-    @apply rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-primary;
+    @apply rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-[12px] font-medium text-primary;
   }
 
   .sr-muted-card {
@@ -256,58 +256,20 @@
     mask-image: radial-gradient(circle, transparent 18%, black 19%);
   }
 
-  /* Keep compact UI text readable across navigation, metadata, cards, and sidebars. */
-  .text-\[8px\],
+  .text-\[8px\] {
+    font-size: 9px;
+  }
+
   .text-\[9px\] {
-    font-size: 0.6875rem;
-    line-height: 0.9375rem;
+    font-size: 10px;
   }
 
-  .text-\[10px\],
+  .text-\[10px\] {
+    font-size: 11px;
+  }
+
   .text-\[11px\] {
-    font-size: 0.75rem;
-    line-height: 1rem;
-  }
-
-  .sr-readable-panel {
-    font-size: 1.0625rem;
-  }
-
-  .sr-readable-panel .text-\[8px\],
-  .sr-readable-panel .text-\[9px\] {
-    font-size: 0.75rem;
-    line-height: 1rem;
-  }
-
-  .sr-readable-panel .text-\[10px\],
-  .sr-readable-panel .text-\[11px\] {
-    font-size: 0.8125rem;
-    line-height: 1.125rem;
-  }
-
-  .sr-readable-panel .text-xs {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-
-  .sr-readable-panel .text-sm {
-    font-size: 0.9375rem;
-    line-height: 1.375rem;
-  }
-
-  .sr-readable-panel .text-base {
-    font-size: 1.0625rem;
-    line-height: 1.5rem;
-  }
-
-  .sr-readable-panel .text-lg {
-    font-size: 1.1875rem;
-    line-height: 1.625rem;
-  }
-
-  .sr-readable-panel .text-xl {
-    font-size: 1.3125rem;
-    line-height: 1.75rem;
+    font-size: 12px;
   }
 }
 

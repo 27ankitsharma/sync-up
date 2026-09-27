@@ -77,7 +77,7 @@ export default function Home() {
               {heroQuestions.map((question) => (
                 <span
                   key={question.label}
-                  className={`rounded-full border px-4 py-2 text-base font-medium shadow-sm backdrop-blur ${question.className}`}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur ${question.className}`}
                 >
                   {question.label}
                 </span>
