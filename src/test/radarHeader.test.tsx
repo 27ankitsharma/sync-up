@@ -13,7 +13,7 @@ describe("RadarHeader", () => {
     );
 
     expect(screen.queryByRole("button", { name: "For You" })).not.toBeInTheDocument();
-    expect(screen.getByText("This month")).toBeInTheDocument();
+    expect(screen.getByText("All time")).toBeInTheDocument();
 
     const all = screen.getByRole("button", { name: "All" });
     const newTopics = screen.getByRole("button", { name: "New Topics" });

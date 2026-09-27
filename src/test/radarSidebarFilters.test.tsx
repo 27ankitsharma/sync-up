@@ -17,7 +17,7 @@ vi.mock("@/hooks/useUser", () => ({
 }));
 
 describe("shared sidebar filters", () => {
-  it("shows Radar filters below My Stats with This Month selected", () => {
+  it("shows Radar filters below My Stats with All selected", () => {
     render(
       <MemoryRouter>
         <RadarFilterProvider>
@@ -30,6 +30,6 @@ describe("shared sidebar filters", () => {
     expect(filtersPanel).not.toBeNull();
     expect(within(filtersPanel!).getByRole("combobox", { name: "Priority filter" })).toBeInTheDocument();
     expect(within(filtersPanel!).getByRole("combobox", { name: "Source filter" })).toBeInTheDocument();
-    expect(within(filtersPanel!).getByRole("combobox", { name: "Time filter" })).toHaveTextContent("This Month");
+    expect(within(filtersPanel!).getByRole("combobox", { name: "Time filter" })).toHaveTextContent("All");
   });
 });

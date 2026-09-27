@@ -4,6 +4,14 @@ import { LandingHeroVisual } from "@/components/landing/LandingHeroVisual";
 import { SyncRadarWordmark } from "@/components/SyncRadarWordmark";
 import { BookOpen, Gauge, Map, Radar } from "lucide-react";
 
+const heroQuestions = [
+  { label: "What matters?", className: "border-blue-200 bg-blue-50/90 text-blue-700" },
+  { label: "What should I learn next?", className: "border-indigo-200 bg-indigo-50/90 text-indigo-700" },
+  { label: "How does it connect?", className: "border-violet-200 bg-violet-50/90 text-violet-700" },
+  { label: "What's changing?", className: "border-teal-200 bg-teal-50/90 text-teal-700" },
+  { label: "Am I still in sync?", className: "border-emerald-200 bg-emerald-50/90 text-emerald-700" },
+];
+
 const features = [
   {
     title: "LiveMap",
@@ -65,13 +73,16 @@ export default function Home() {
               <br />
               <span className="text-primary">Stay in sync.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-xl font-medium leading-relaxed text-slate-800 sm:text-2xl">
-              Know what matters. Learn what you need. Stay current with what&apos;s changing.
-            </p>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
-              SyncRadar helps AI professionals navigate the AI landscape, learn relevant topics, and stay aware of
-              what&apos;s changing — all in one place.
-            </p>
+            <div className="mt-7 flex max-w-xl flex-wrap gap-2.5">
+              {heroQuestions.map((question) => (
+                <span
+                  key={question.label}
+                  className={`rounded-full border px-4 py-2 text-base font-medium shadow-sm backdrop-blur ${question.className}`}
+                >
+                  {question.label}
+                </span>
+              ))}
+            </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
                 <Link to="/livemap">Explore LiveMap →</Link>

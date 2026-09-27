@@ -21,7 +21,7 @@ export function MyContextSidebar() {
   const { data: syncMetrics, isError } = useSyncMetrics(selectedLens);
 
   return (
-    <aside className="hidden xl:flex w-[184px] shrink-0 flex-col gap-2">
+    <aside className="sr-readable-panel hidden xl:flex w-[184px] shrink-0 flex-col gap-2">
       <Panel>
         <PanelTitle>My Context</PanelTitle>
         <div className="rounded-xl bg-violet-50 p-2">

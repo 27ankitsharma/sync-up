@@ -12,7 +12,11 @@ describe("Home landing page", () => {
     );
 
     expect(screen.getByRole("heading", { name: /AI moves fast/i })).toBeInTheDocument();
-    expect(screen.getByText("Know what matters. Learn what you need. Stay current with what's changing.")).toBeInTheDocument();
+    expect(screen.getByText("What matters?")).toBeInTheDocument();
+    expect(screen.getByText("What should I learn next?")).toBeInTheDocument();
+    expect(screen.getByText("How does it connect?")).toBeInTheDocument();
+    expect(screen.getByText("What's changing?")).toBeInTheDocument();
+    expect(screen.getByText("Am I still in sync?")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "One system. Four ways to stay in sync." })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Your role changes what matters." })).toBeInTheDocument();
     expect(screen.queryByText(/information problem/i)).not.toBeInTheDocument();
