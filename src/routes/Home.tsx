@@ -1,203 +1,162 @@
-import { useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { LandingHeroVisual } from "@/components/landing/LandingHeroVisual";
-import { LandingKnowledgeTree } from "@/components/landing/LandingKnowledgeTree";
-import { Compass, Gauge, Map, Radar, UserRound } from "lucide-react";
-
-const questions = [
-  "What matters?",
-  "What should I learn next?",
-  "How does it connect?",
-  "What's changing?",
-  "Am I still in sync?",
-];
-
-const loop = ["Discover", "Understand", "Learn", "Track", "Stay Updated"];
+import { SyncRadarWordmark } from "@/components/SyncRadarWordmark";
+import { BookOpen, Gauge, Map, Radar } from "lucide-react";
 
 const features = [
   {
     title: "LiveMap",
-    kicker: "See the AI landscape.",
-    body: "A living hierarchy of tracks, subjects, modules, and topics — so you can see how AI knowledge fits together.",
+    kicker: "Know what matters.",
+    body: "Explore the AI landscape through a living map of tracks, subjects, modules, and topics.",
     icon: Map,
+    accent: "border-blue-100 bg-gradient-to-br from-white to-blue-50/70",
+    iconClass: "bg-blue-100 text-blue-700",
+    textClass: "text-blue-700",
+  },
+  {
+    title: "Learn",
+    kicker: "Learn what you need.",
+    body: "Go deeper with focused courses and lessons connected directly to the knowledge map.",
+    icon: BookOpen,
+    accent: "border-indigo-100 bg-gradient-to-br from-white to-indigo-50/70",
+    iconClass: "bg-indigo-100 text-indigo-700",
+    textClass: "text-indigo-700",
   },
   {
     title: "Radar",
     kicker: "Know what's changing.",
-    body: "Emerging signals, announcements, and updates — ranked by relevance to your role, not by noise.",
+    body: "Discover new topics, developments, and updates relevant to your role.",
     icon: Radar,
+    accent: "border-emerald-100 bg-gradient-to-br from-white to-emerald-50/60",
+    iconClass: "bg-emerald-100 text-emerald-700",
+    textClass: "text-emerald-700",
   },
   {
-    title: "Role-based Perspective",
-    kicker: "Focus on what matters to your role.",
-    body: "The same landscape reads differently for an AI Engineer, Researcher, or Leader. SyncRadar keeps that lens on.",
-    icon: UserRound,
-  },
-  {
-    title: "Knowledge Sync & Radar Sync",
+    title: "Sync",
     kicker: "Know where you stand.",
-    body: "See coverage against what matters for your work — and where the gaps are — without pretending you need everything.",
+    body: "Track your demonstrated knowledge with Knowledge Sync and Radar Sync.",
     icon: Gauge,
+    accent: "border-blue-100 bg-gradient-to-br from-white to-blue-50/70",
+    iconClass: "bg-blue-100 text-blue-700",
+    textClass: "text-blue-700",
   },
 ];
 
-const steps = [
-  { title: "Explore", body: "Orient yourself on LiveMap. Follow Radar when something new should change what you pay attention to." },
-  { title: "Learn", body: "Open the course for a topic when you need depth — lessons stay tied to the same map." },
-  { title: "Track", body: "Save progress, see your Knowledge and Radar Sync, and come back to what is still out of date." },
+const roles = [
+  "AI Engineer",
+  "Data Scientist",
+  "Researcher",
+  "ML Engineer",
+  "AI Product Manager",
+  "AI/ML Leader",
 ];
 
 export default function Home() {
-  const location = useLocation();
-
-  useEffect(() => {
-    const id = location.hash.replace("#", "");
-    if (!id) return;
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [location.hash]);
-
   return (
-    <div className="bg-[#fbfaff] text-slate-900">
-      <section className="mx-auto max-w-6xl px-5 pb-20 pt-16 sm:pt-24">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">SyncRadar</p>
-        <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-          AI moves fast. <span className="text-primary">Stay in sync.</span>
-        </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
-          SyncRadar helps AI professionals navigate what matters, understand where they stand, and continuously build
-          relevant knowledge — without chasing every paper, model, and framework.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
-            <Link to="/livemap">Explore LiveMap</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="h-12 rounded-full border-violet-200 bg-white/80 px-7 text-base">
-            <Link to="/radar">Explore Radar</Link>
-          </Button>
-        </div>
-        <div className="mt-14">
+    <div className="overflow-hidden bg-[#fbfaff] text-slate-900">
+      <section className="relative">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(139,92,246,0.10),transparent_34%),radial-gradient(circle_at_85%_24%,rgba(99,102,241,0.10),transparent_30%)]" />
+        <div className="relative mx-auto grid max-w-6xl gap-12 px-5 pb-20 pt-16 sm:pt-24 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:pb-24">
+          <div>
+            <SyncRadarWordmark className="text-[19px]" />
+            <h1 className="mt-5 text-5xl font-semibold leading-[1.02] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
+              AI moves fast.
+              <br />
+              <span className="text-primary">Stay in sync.</span>
+            </h1>
+            <p className="mt-6 max-w-xl text-xl font-medium leading-relaxed text-slate-800 sm:text-2xl">
+              Know what matters. Learn what you need. Stay current with what&apos;s changing.
+            </p>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600 sm:text-lg">
+              SyncRadar helps AI professionals navigate the AI landscape, learn relevant topics, and stay aware of
+              what&apos;s changing — all in one place.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 rounded-full px-7 text-base">
+                <Link to="/livemap">Explore LiveMap →</Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 rounded-full border-violet-200 bg-white/80 px-7 text-base"
+              >
+                <Link to="/radar">Explore Radar</Link>
+              </Button>
+            </div>
+          </div>
           <LandingHeroVisual />
         </div>
       </section>
 
       <section className="border-y border-violet-100/80 bg-white/60">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <h2 className="max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            AI doesn&apos;t have an information problem. We have a relevance problem.
-          </h2>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-            Models, techniques, frameworks, research, tools, and architectures arrive faster than anyone can consume.
-            The hard part is not finding more content. It is knowing what deserves attention.
+        <div className="mx-auto max-w-6xl px-5 py-20 sm:py-24">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            The <span className="text-[#2563EB]">Sync</span>
+            <span className="text-[#059669]">Radar</span> system
           </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            {questions.map((question) => (
-              <span
-                key={question}
-                className="rounded-full border border-violet-100 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm"
+          <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">One system. Four ways to stay in sync.</h2>
+          <div className="mt-10 grid auto-rows-fr gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((feature) => (
+              <article
+                key={feature.title}
+                className={`rounded-3xl border p-6 shadow-[0_24px_60px_-42px_rgba(87,63,191,0.5)] ${feature.accent}`}
               >
-                {question}
-              </span>
+                <div className={`grid h-10 w-10 place-items-center rounded-2xl ${feature.iconClass}`}>
+                  <feature.icon className="h-5 w-5" />
+                </div>
+                <h3 className="mt-5 text-xl font-semibold">{feature.title}</h3>
+                <p className={`mt-1 text-sm font-semibold ${feature.textClass}`}>{feature.kicker}</p>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">{feature.body}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">What is SyncRadar?</p>
-        <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
-          Your knowledge operating system for AI.
-        </h2>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-          SyncRadar is a living knowledge platform. It helps you discover what is relevant, understand how it connects,
-          learn the concepts that matter, track your coverage, and stay updated as the field moves.
-        </p>
-        <div className="mt-10 flex flex-wrap items-center gap-2">
-          {loop.map((item, index) => (
-            <div key={item} className="flex items-center gap-2">
-              <span className="rounded-2xl border border-violet-100 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-sm">
-                {item}
-              </span>
-              {index < loop.length - 1 && <span className="text-violet-300">→</span>}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 pb-20">
-        <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">The system, not another feed</h2>
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          {features.map((feature) => (
-            <article
-              key={feature.title}
-              className="rounded-3xl border border-violet-100 bg-white/80 p-7 shadow-[0_24px_60px_-40px_rgba(87,63,191,0.5)] backdrop-blur"
-            >
-              <feature.icon className="h-5 w-5 text-primary" />
-              <h3 className="mt-4 text-xl font-semibold">{feature.title}</h3>
-              <p className="mt-1 text-sm font-medium text-primary">{feature.kicker}</p>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">{feature.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-y border-violet-100/80 bg-white/60">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">How it works</h2>
-          <div className="mt-10 grid gap-8 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={step.title}>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                  0{index + 1} · {step.title}
-                </p>
-                <p className="mt-3 text-base leading-relaxed text-slate-600">{step.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 py-20">
-        <div className="flex items-start gap-3">
-          <Compass className="mt-1 h-5 w-5 text-primary" />
+      <section className="mx-auto max-w-6xl px-5 py-20 sm:py-24">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div>
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">A living knowledge map</h2>
-            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">
-              The catalogue is a hierarchy — Track → Subject → Module → Topic — and it keeps evolving as the field
-              does. Radar is how new signals enter. LiveMap is how they stay connected.
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Personalized for you</p>
+            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Your role changes what matters.</h2>
+            <p className="mt-5 text-xl font-medium text-slate-900">The AI landscape is the same. Your priorities aren&apos;t.</p>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+              Choose your role or lens — and SyncRadar adapts what you see across LiveMap, Learn, Radar, and Sync.
             </p>
           </div>
-        </div>
-        <div className="mt-10">
-          <LandingKnowledgeTree />
-        </div>
-      </section>
-
-      <section id="about" className="scroll-mt-24 border-y border-violet-100/80 bg-white/60">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Why SyncRadar</p>
-          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Why SyncRadar exists
-          </h2>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-            AI knowledge is expanding faster than individuals can consume it. More courses and more feeds do not fix
-            that. They add more to chase.
-          </p>
-          <p className="mt-6 max-w-2xl text-xl font-medium leading-relaxed text-slate-900">
-            You don&apos;t need to learn everything. You need to know what matters, understand where you stand, and stay
-            aware of what is changing.
-          </p>
+          <div className="rounded-[1.75rem] border border-violet-100 bg-white/75 p-5 shadow-[0_24px_60px_-44px_rgba(87,63,191,0.45)] backdrop-blur">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {roles.map((role, index) => (
+                <div
+                  key={role}
+                  className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+                    index === 0
+                      ? "border-primary/20 bg-primary/10 text-primary"
+                      : "border-violet-100 bg-violet-50/45 text-slate-600"
+                  }`}
+                >
+                  {role}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-24 text-center">
-        <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Don&apos;t chase AI. Stay in sync with it.
-        </h2>
-        <div className="mt-8">
-          <Button asChild size="lg" className="h-12 rounded-full px-8 text-base">
-            <Link to="/livemap">Start Exploring →</Link>
-          </Button>
+      <section className="px-5 pb-20 sm:pb-24">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-violet-100/80 via-white to-indigo-100/70 px-6 py-16 text-center shadow-[0_35px_80px_-52px_rgba(87,63,191,0.65)] sm:px-10 sm:py-20">
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative">
+            <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              Don&apos;t chase AI. Stay in sync with it.
+            </h2>
+            <div className="mt-8">
+              <Button asChild size="lg" className="h-12 rounded-full px-8 text-base">
+                <Link to="/livemap">Start Exploring →</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
     </div>

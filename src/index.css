@@ -151,7 +151,7 @@
   }
 
   .sr-pill {
-    @apply rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-primary;
+    @apply rounded-full border border-violet-100 bg-violet-50 px-2.5 py-1 text-xs font-medium text-primary;
   }
 
   .sr-muted-card {
@@ -254,6 +254,19 @@
     background: conic-gradient(from 0deg, transparent 0deg, rgba(139, 92, 246, 0.22) 50deg, transparent 80deg);
     animation: landing-radar-spin 7s linear infinite;
     mask-image: radial-gradient(circle, transparent 18%, black 19%);
+  }
+
+  /* Keep compact UI text readable across navigation, metadata, cards, and sidebars. */
+  .text-\[8px\],
+  .text-\[9px\] {
+    font-size: 0.6875rem;
+    line-height: 0.9375rem;
+  }
+
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.75rem;
+    line-height: 1rem;
   }
 }
 

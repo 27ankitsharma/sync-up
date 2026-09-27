@@ -95,7 +95,6 @@ function LiveMapKnowledgeHub({
   const isCompleted = Boolean(topic && completedTopicSlugs.includes(topic.slug));
   const progressPercent = isCompleted ? 100 : 0;
   const siblings = topic ? siblingTopics(topic, allTopics) : [];
-  const prerequisites = topic ? siblings.filter((item) => item.order < topic.order) : [];
   const related = siblings.filter((item) => topicRelevance(item, selectedLens) !== "Optional");
   const roles = topic?.roles ?? [];
   const resources = topic?.resources ?? [];
@@ -142,23 +141,6 @@ function LiveMapKnowledgeHub({
             </HubSection>
             <HubSection title="Why it matters">
               {whyItMatters ? <p>{whyItMatters}</p> : <HubEmptyNote>Why it matters will appear when editorial copy is published.</HubEmptyNote>}
-            </HubSection>
-            <HubSection title="Key concepts">
-              <HubEmptyNote>Key concepts will appear here when editorial content is published.</HubEmptyNote>
-            </HubSection>
-            <HubSection title="What you'll learn">
-              <HubEmptyNote>Learning outcomes will appear here when the course outline is published.</HubEmptyNote>
-            </HubSection>
-            <HubSection title="Prerequisites">
-              {prerequisites.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {prerequisites.map((item) => (
-                    <HubChip key={item.id}>{item.title}</HubChip>
-                  ))}
-                </div>
-              ) : (
-                <HubEmptyNote>No prerequisites are listed for this selection yet.</HubEmptyNote>
-              )}
             </HubSection>
             {topic && (
               <HubSection title="Your progress">

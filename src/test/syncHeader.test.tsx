@@ -47,9 +47,9 @@ describe("authenticated header sync metrics", () => {
     const radar = screen.getByRole("link", { name: "Radar Sync 48%" });
 
     expect(knowledge).toHaveAttribute("href", "/livemap");
-    expect(knowledge).toHaveClass("text-indigo-700");
+    expect(knowledge).toHaveClass("text-[#2563EB]");
     expect(radar).toHaveAttribute("href", "/radar");
-    expect(radar).toHaveClass("text-emerald-700");
+    expect(radar).toHaveClass("text-[#059669]");
     expect(screen.queryByText(/^Sync /)).not.toBeInTheDocument();
   });
 });

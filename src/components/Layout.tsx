@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthNav } from "@/components/AuthNav";
+import { SyncRadarWordmark } from "@/components/SyncRadarWordmark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { KnowledgeHub } from "@/components/knowledge/KnowledgeHub";
@@ -20,7 +21,6 @@ const appNavItems = [
 const publicNavItems = [
   { path: "/livemap", label: "LiveMap" },
   { path: "/radar", label: "Radar" },
-  { path: "/#about", label: "About" },
 ];
 
 export function Layout({
@@ -32,13 +32,13 @@ export function Layout({
 }) {
   return (
     <div className="min-h-screen bg-[#fbfaff] font-sans">
-      <AppHeader />
+      <AppHeader forcePublic={variant === "marketing"} />
       {variant === "marketing" ? (
         <div className="min-h-[calc(100vh-60px)]">{children}</div>
       ) : (
         <div className="flex min-h-[calc(100vh-60px)] gap-3 p-3">
           <MyContextSidebar />
-          <main className="min-w-0 w-full max-w-[620px] shrink grow-0">{children}</main>
+          <main className="min-w-0 w-full max-w-[893px] shrink grow-0">{children}</main>
           <KnowledgeHub />
         </div>
       )}
@@ -46,11 +46,11 @@ export function Layout({
   );
 }
 
-export function AppHeader() {
+export function AppHeader({ forcePublic = false }: { forcePublic?: boolean }) {
   const { data: user, isLoading } = useAuthUser();
   const isAuthenticated = Boolean(user);
 
-  if (isLoading || !isAuthenticated) {
+  if (forcePublic || isLoading || !isAuthenticated) {
     return <PublicHeader />;
   }
 
@@ -59,30 +59,32 @@ export function AppHeader() {
 
 function BrandLink() {
   return (
-    <Link to="/" className="flex w-44 items-center gap-3 shrink-0">
+    <Link to="/" className="flex w-auto shrink-0 items-center gap-2 sm:w-44 sm:gap-3">
       <img
         src="/syncradar-icon.png"
         alt="SyncRadar"
-        className="h-9 w-9 shrink-0 rounded-2xl object-cover shadow-sm"
+        className="h-8 w-8 shrink-0 rounded-xl object-cover shadow-sm sm:h-9 sm:w-9 sm:rounded-2xl"
       />
       <span>
-        <span className="block text-sm font-bold leading-none tracking-tight">SyncRadar</span>
-        <span className="block text-[10px] text-muted-foreground">Stay in sync with AI</span>
+        <SyncRadarWordmark className="block text-[19px] leading-none" />
+        <span className="mt-0.5 hidden text-xs font-normal leading-none text-muted-foreground sm:block">
+          Stay in sync with AI
+        </span>
       </span>
     </Link>
   );
 }
 
 function PublicHeader() {
-  const { pathname, hash } = useLocation();
+  const { pathname } = useLocation();
 
   return (
     <header className="sticky top-0 z-50 border-b border-violet-100/70 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-[60px] max-w-[1680px] items-center gap-3 px-5">
+      <div className="mx-auto flex h-[60px] max-w-[1680px] items-center gap-3 px-3 sm:px-5">
         <BrandLink />
-        <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+        <nav className="hidden items-center gap-1 md:flex">
           {publicNavItems.map(({ path, label }) => {
-            const isActive = path === "/#about" ? pathname === "/" && hash === "#about" : pathname === path;
+            const isActive = pathname === path;
             return (
               <Link
                 key={path}
@@ -97,9 +99,9 @@ function PublicHeader() {
             );
           })}
         </nav>
-        <div className="flex shrink-0 items-center gap-2">
-          <Button asChild size="sm" variant="ghost" className="h-8">
-            <Link to="/login">Sign In</Link>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <Button asChild size="sm" variant="ghost" className="h-8 px-2 sm:px-3">
+            <Link to="/login">Log in</Link>
           </Button>
           <Button asChild size="sm" className="h-8 rounded-full px-4">
             <Link to="/login?redirect=/livemap">Get Started</Link>
@@ -159,7 +161,7 @@ function AuthenticatedHeader() {
           <div className="hidden items-center overflow-hidden rounded-xl border border-violet-100 bg-white text-[11px] shadow-sm lg:flex">
             <Link
               to="/livemap"
-              className="flex items-center gap-1.5 bg-indigo-50 px-2.5 py-1.5 font-bold text-indigo-700 transition-colors hover:bg-indigo-100"
+              className="flex items-center gap-1.5 bg-blue-50 px-2.5 py-1.5 font-bold text-[#2563EB] transition-colors hover:bg-blue-100"
               title="Knowledge Sync for the selected role"
             >
               <span>Knowledge Sync</span>
@@ -168,7 +170,7 @@ function AuthenticatedHeader() {
             <span className="h-5 w-px bg-violet-100" aria-hidden="true" />
             <Link
               to="/radar"
-              className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1.5 font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+              className="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1.5 font-bold text-[#059669] transition-colors hover:bg-emerald-100"
               title="Radar Sync for current Radar content"
             >
               <span>Radar Sync</span>

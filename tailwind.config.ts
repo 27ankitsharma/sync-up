@@ -112,6 +112,9 @@ export default {
         sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
         mono: ["JetBrains Mono", "Menlo", "Monaco", "monospace"],
       },
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.125rem" }],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
